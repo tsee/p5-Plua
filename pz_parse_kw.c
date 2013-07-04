@@ -1,6 +1,8 @@
 #include "pz_parse_kw.h"
 #include "pz_debug.h"
+
 #include "pz_global_state.h"
+#include "pz_op.h"
 
 static void
 free_op(pTHX_ void *ptr) {
@@ -81,12 +83,13 @@ scan_heredoc_delim(pTHX_ char *delim, STRLEN delimlen)
 }
 
 static void
-parse_zoom_block(pTHX_ OP **op_ptr) {
-  OP **return_op;
+parse_zoom_block(pTHX_ OP **op_ptr)
+{
   int save_ix;
   I32 c;
   SV *delim;
   SV *heredoc;
+  PADOFFSET test_padofs;
 
   lex_read_space(0);
 
@@ -106,15 +109,20 @@ parse_zoom_block(pTHX_ OP **op_ptr) {
   if (c != ';')
     croak("Can't parse HERE-doc after 'zoom'");
 
+  /*
   Newx(return_op, 1, OP *);
   *return_op = NULL;
   SAVEDESTRUCTOR_X(free_op, return_op);
+  */
 
   heredoc = scan_heredoc_delim(aTHX_ SvPVX(delim), SvCUR(delim));
   /*sv_dump(heredoc);*/
 
-  *op_ptr = *return_op;
-  *return_op = NULL;
+  /* FIXME just playing... */
+  *op_ptr = pz_prepare_custom_op(aTHX);
+
+  test_padofs = pad_findmy("$foo", 4, 0);
+  ((pz_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;
 }
  
 
@@ -126,7 +134,6 @@ pz_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) {
   if (keyword_len == 4 && memcmp(keyword_ptr, "zoom", 4) == 0) {
     SAVETMPS;
     parse_zoom_block(aTHX_ op_ptr);
-    *op_ptr = NULL;
     ret = KEYWORD_PLUGIN_STMT;
     FREETMPS;
   } else {

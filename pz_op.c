@@ -10,6 +10,13 @@ OP *
 pz_pp_custom(pTHX)
 {
   dVAR; dSP;
+  pz_op_aux_t *aux;
+  aux = (pz_op_aux_t *)PL_op->op_targ;
+
+  if (aux->test != NOT_IN_PAD) {
+    SV *s = PAD_SVl(aux->test);
+    sv_setiv_mg(s, SvIV(s)+1);
+  }
 
   PZ_DEBUG("Finished executing OP.\n");
   RETURN;
@@ -36,10 +43,10 @@ pz_op_free_hook(pTHX_ OP *o)
 }
 
 
-LISTOP *
+OP *
 pz_prepare_custom_op(pTHX)
 {
-  LISTOP *op;
+  OP *op;
   pz_op_aux_t *aux;
 
   NewOp(1101, op, 1, LISTOP);

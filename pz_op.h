@@ -11,6 +11,7 @@
  * data that we attach to each OP. */
 typedef struct {
   /* void (*fun)(void); */
+  PADOFFSET test;
   PADOFFSET saved_op_targ; /* Replacement for custom OP's op_targ if necessary */
 } pz_op_aux_t;
 
@@ -21,6 +22,6 @@ OP *pz_pp_custom(pTHX);
 void pz_op_free_hook(pTHX_ OP *o);
 
 /* Set up OP without doing actual compilation. */
-LISTOP *pz_prepare_op(pTHX);
+OP *pz_prepare_custom_op(pTHX);
 
 #endif
