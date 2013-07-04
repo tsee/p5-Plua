@@ -1,0 +1,15 @@
+MANIFEST.bak
+MYMETA.*
+META.*
+Makefile
+Makefile.old
+Makefile.back
+*.bs
+PZoom.c
+*.o
+blib/
+pm_to_blib
+*.tar.gz
+/PZoom-*/
+*.swp
+*.swo
