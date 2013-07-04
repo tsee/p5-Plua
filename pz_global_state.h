@@ -13,7 +13,7 @@ extern XOP PZ_xop;
 extern int (*PZ_next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* Original opfreehook - we wrap this to free JIT OP aux structs */
-/* extern Perl_ophook_t PZ_orig_opfreehook; */
+extern Perl_ophook_t PZ_orig_opfreehook;
 
 /* Initialize global state like custom op description, etc. */
 void pz_init_global_state(pTHX);
