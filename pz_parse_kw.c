@@ -51,63 +51,60 @@ my_scan_word(pTHX) {
 }
 
 static SV *
-scan_heredoc_delim(pTHX_ char *delim, STRLEN delimlen)
+scan_lua_block_delim(pTHX_ const unsigned int ndelimchars)
 {
   while(1) {
-    char *end = PL_parser->bufend;
+    char* const end = PL_parser->bufend;
     char *s = PL_parser->bufptr;
-    while (s != end) {
-      if (*s == '\n') {
-        if (end-s < delimlen+1) {
-          break;
-        }
-        else if (strncmp(s+1, delim, (size_t)delimlen) == 0) {
-          /* FIXME scan whitespace to end of line here */
+    unsigned int ndelim = 0;
+    while (end-s > ndelimchars) {
+      if (*s == '}') {
+        ndelim++;
+        if (ndelim == ndelimchars) {
           SV *rv;
-          rv = sv_2mortal(newSVpvn(PL_parser->bufptr, s - PL_parser->bufptr));
-          lex_read_to(s+delimlen+1);
+          rv = sv_2mortal(newSVpvn(PL_parser->bufptr, s - PL_parser->bufptr - ndelimchars+1));
+          lex_read_to(s+1); /* skip Perl's lexer/parser ahead to end of Lua block */
           return rv;
-        }
-        else {
-          s += delimlen;
         }
       }
       else {
-        s++;
+        ndelim = 0;
       }
+      s++;
     }
     if ( !lex_next_chunk(LEX_KEEP_PREVIOUS) )
-      croak("syntax error");
+      croak("Syntax error: cannot find Lua block delimiter");
   }
   return NULL;
 }
 
 static void
-parse_zoom_block(pTHX_ OP **op_ptr)
+parse_lua_block(pTHX_ OP **op_ptr)
 {
   int save_ix;
   I32 c;
   SV *delim;
   SV *heredoc;
   PADOFFSET test_padofs;
+  unsigned int ndelimchars = 1;
 
   lex_read_space(0);
 
+  /* Let's use {{ as delimiter ... */
   c = lex_read_unichar(0);
-  if (c != '<')
-    croak("Can't parse HERE-doc after 'zoom'");
+  if (c != '{')
+    croak("Can't parse Lua block after 'lua'");
 
-  c = lex_read_unichar(0);
-  if (c != '<')
-    croak("Can't parse HERE-doc after 'zoom'");
+  while (1) {
+    c = lex_read_unichar(0);
+    if (c != '{')
+      break;
+    ndelimchars++;
+  }
 
   lex_read_space(0);
-  delim = my_scan_word(aTHX);
 
   lex_read_space(0);
-  c = lex_read_unichar(0);
-  if (c != ';')
-    croak("Can't parse HERE-doc after 'zoom'");
 
   /*
   Newx(return_op, 1, OP *);
@@ -115,7 +112,7 @@ parse_zoom_block(pTHX_ OP **op_ptr)
   SAVEDESTRUCTOR_X(free_op, return_op);
   */
 
-  heredoc = scan_heredoc_delim(aTHX_ SvPVX(delim), SvCUR(delim));
+  heredoc = scan_lua_block_delim(aTHX_ ndelimchars);
   /*sv_dump(heredoc);*/
 
   /* FIXME just playing... */
@@ -131,9 +128,9 @@ int
 pz_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) {
   int ret;
 
-  if (keyword_len == 4 && memcmp(keyword_ptr, "zoom", 4) == 0) {
+  if (keyword_len == 3 && memcmp(keyword_ptr, "lua", 3) == 0) {
     SAVETMPS;
-    parse_zoom_block(aTHX_ op_ptr);
+    parse_lua_block(aTHX_ op_ptr);
     ret = KEYWORD_PLUGIN_STMT;
     FREETMPS;
   } else {
