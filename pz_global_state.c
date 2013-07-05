@@ -25,9 +25,9 @@ pz_init_global_state(pTHX)
   PL_opfreehook = pz_op_free_hook;
 
   /* Setup our custom op */
-  XopENTRY_set(&PZ_xop, xop_name, "zoomop");
-  XopENTRY_set(&PZ_xop, xop_desc, "zoooooom");
-  XopENTRY_set(&PZ_xop, xop_class, OA_LISTOP);
+  XopENTRY_set(&PZ_xop, xop_name, "luaop");
+  XopENTRY_set(&PZ_xop, xop_desc, "Inlined Lua Execution");
+  XopENTRY_set(&PZ_xop, xop_class, OA_BASEOP);
   Perl_custom_op_register(aTHX_ pz_pp_custom, &PZ_xop);
 
   /* Init Lua compiler/interpreter */
