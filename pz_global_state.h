@@ -6,6 +6,11 @@
 #include <EXTERN.h>
 #include <perl.h>
 
+#include <lua.h>
+
+/* The Lua compiler/interpreter - FIXME ought to be in thread-local storage */
+extern lua_State *PZ_lua_int;
+
 /* The custom op definition structure */
 extern XOP PZ_xop;
 
@@ -19,7 +24,7 @@ extern Perl_ophook_t PZ_orig_opfreehook;
 void pz_init_global_state(pTHX);
 
 /* End-of-global-destruction cleanup hook. */
-/* void pz_global_state_final_cleanup(pTHX_ void *ptr); */
+void pz_global_state_final_cleanup(pTHX_ void *ptr);
 
 
 #endif
