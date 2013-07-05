@@ -7,6 +7,8 @@ use PZoom;
 my $foo = 1;
 lua {
   local bar = 1;
+  print("foooooo\n");
+  print(bar);
 }
 warn $foo;
 

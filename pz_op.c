@@ -44,7 +44,7 @@ pz_op_free_hook(pTHX_ OP *o)
 
 
 OP *
-pz_prepare_custom_op(pTHX)
+pz_prepare_custom_op(pTHX, void *lua_func)
 {
   OP *op;
   pz_op_aux_t *aux;

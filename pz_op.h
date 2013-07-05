@@ -12,6 +12,7 @@
 typedef struct {
   /* void (*fun)(void); */
   PADOFFSET test;
+  void *lua_fun;
   PADOFFSET saved_op_targ; /* Replacement for custom OP's op_targ if necessary */
 } pz_op_aux_t;
 
@@ -22,6 +23,6 @@ OP *pz_pp_custom(pTHX);
 void pz_op_free_hook(pTHX_ OP *o);
 
 /* Set up OP without doing actual compilation. */
-OP *pz_prepare_custom_op(pTHX);
+OP *pz_prepare_custom_op(pTHX, void *lua_func);
 
 #endif

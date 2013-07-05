@@ -98,6 +98,7 @@ parse_lua_block(pTHX_ OP **op_ptr)
   char *code_str;
   STRLEN code_len;
   int compile_status;
+  void *lua_fun;
 
   lex_read_space(0);
 
@@ -133,10 +134,21 @@ parse_lua_block(pTHX_ OP **op_ptr)
   default:
     croak("Couldn't compile inline code");
   }
+  /*printf("'%s'\n", lua_typename(PZ_lua_int, lua_type(PZ_lua_int, -1)));*/
   /*sv_dump(lua_code);*/
 
+  lua_fun = lua_topointer(PZ_lua_int, -1);
+  lua_pop(PZ_lua_int, 1);
+  /*compile_status = lua_pcall(PZ_lua_int, 0, LUA_MULTRET, 0);*/
+  /*
+  compile_status = lua_pcall(PZ_lua_int, 0, 0, 0);
+  if (compile_status != 0) {
+    fprintf(stderr, "Failed to run script: %s\n", lua_tostring(PZ_lua_int, -1));
+  }
+  */
+
   /* FIXME just playing... */
-  *op_ptr = pz_prepare_custom_op(aTHX);
+  *op_ptr = pz_prepare_custom_op(aTHX, lua_fun);
 
   test_padofs = pad_findmy("$foo", 4, 0);
   ((pz_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;
