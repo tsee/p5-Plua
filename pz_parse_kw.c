@@ -84,13 +84,13 @@ parse_lua_block(pTHX_ OP **op_ptr)
   int save_ix;
   I32 c;
   SV *delim;
-  SV *heredoc;
+  SV *lua_code;
   PADOFFSET test_padofs;
   unsigned int ndelimchars = 1;
 
   lex_read_space(0);
 
-  /* Let's use {{ as delimiter ... */
+  /* Let's use one or multiple opening curlies as delimiter ... */
   c = lex_read_unichar(0);
   if (c != '{')
     croak("Can't parse Lua block after 'lua'");
@@ -112,8 +112,8 @@ parse_lua_block(pTHX_ OP **op_ptr)
   SAVEDESTRUCTOR_X(free_op, return_op);
   */
 
-  heredoc = scan_lua_block_delim(aTHX_ ndelimchars);
-  /*sv_dump(heredoc);*/
+  lua_code = scan_lua_block_delim(aTHX_ ndelimchars);
+  /*sv_dump(lua_code);*/
 
   /* FIXME just playing... */
   *op_ptr = pz_prepare_custom_op(aTHX);
