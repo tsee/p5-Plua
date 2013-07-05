@@ -78,6 +78,14 @@ scan_lua_block_delim(pTHX_ const unsigned int ndelimchars)
   return NULL;
 }
 
+static int
+compile_lua_block(pTHX_ char *code, STRLEN len)
+{
+  int status;
+  status = luaL_loadbuffer(PZ_lua_int, code, len, "_INLINED_LUA");
+  return status;
+}
+
 static void
 parse_lua_block(pTHX_ OP **op_ptr)
 {
@@ -87,6 +95,9 @@ parse_lua_block(pTHX_ OP **op_ptr)
   SV *lua_code;
   PADOFFSET test_padofs;
   unsigned int ndelimchars = 1;
+  char *code_str;
+  STRLEN code_len;
+  int compile_status;
 
   lex_read_space(0);
 
@@ -113,6 +124,15 @@ parse_lua_block(pTHX_ OP **op_ptr)
   */
 
   lua_code = scan_lua_block_delim(aTHX_ ndelimchars);
+  code_str = SvPV(lua_code, code_len);
+  compile_status = compile_lua_block(aTHX_ code_str, code_len);
+  switch (compile_status) {
+  case 0:
+    break;
+  case LUA_ERRSYNTAX:
+  default:
+    croak("Couldn't compile inline code");
+  }
   /*sv_dump(lua_code);*/
 
   /* FIXME just playing... */

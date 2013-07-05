@@ -6,7 +6,7 @@ use PZoom;
 
 my $foo = 1;
 lua {
-  asd
+  local bar = 1;
 }
 warn $foo;
 
