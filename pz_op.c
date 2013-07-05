@@ -49,7 +49,7 @@ pz_prepare_custom_op(pTHX)
   OP *op;
   pz_op_aux_t *aux;
 
-  NewOp(1101, op, 1, LISTOP);
+  NewOp(1101, op, 1, OP);
   op->op_type = (OPCODE)OP_CUSTOM;
   op->op_next = (OP *)op;
   op->op_private = 0;
