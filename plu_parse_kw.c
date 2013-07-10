@@ -49,6 +49,7 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   if (c != '{')
     croak("Can't parse Lua block after 'lua'");
 
+  /* FIXME do we need to back up one char at the end of this? */
   while (1) {
     c = lex_read_unichar(0);
     if (c != '{')
