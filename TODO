@@ -1,0 +1,15 @@
+TODO!
+
+- Move much or all of global state to per-Perl-interpreter storage.
+- Concurrent Lua execution with multiple Lua interpreters?
+- ithread-safety?
+- Type conversion between Perl and Lua - Tables are hashes AND arrays. The fun!
+- Get/set syntax for Perl lexicals in Lua?
+  => A way to efficiently stash the PAD offsets
+- The reverse?
+- Improved scanning/lexing for finding the end of the Lua blocks.
+- Wrapping Lua functions for Perl
+- Wrapping Perl functions for Lua
+- Find a way to avoid having to create full-blown Lua functions out of snippets
+  and correspondingly find a more efficient way of executing them than lua_getglobal
+  (IOW lookup by name).
