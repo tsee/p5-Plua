@@ -6,53 +6,7 @@
 #include "pz_lua.h"
 
 static void
-free_op(pTHX_ void *ptr) {
-  OP **opp = ptr;
-  op_free(*opp);
-  Safefree(opp);
-}
-
-static void
-my_sv_cat_c(pTHX_ SV *sv, U32 c) {
-  U8 ds[UTF8_MAXBYTES + 1], *d;
-  d = uvchr_to_utf8(ds, c);
-  if (d - ds > 1) {
-    sv_utf8_upgrade(sv);
-  }
-  sv_catpvn(sv, (char *)ds, d - ds);
-}
-
-#define MY_UNI_IDFIRST(C) isIDFIRST_uni(C)
-#define MY_UNI_IDCONT(C)  isALNUM_uni(C)
-
-static SV *
-my_scan_word(pTHX) {
-  I32 c;
-  SV *sv;
-
-  c = lex_peek_unichar(0);
-  if (c == -1 || !MY_UNI_IDFIRST(c)) {
-    return NULL;
-  }
-  lex_read_unichar(0);
-
-  sv = sv_2mortal(newSVpvs(""));
-  if (lex_bufutf8()) {
-    SvUTF8_on(sv);
-  }
-
-  my_sv_cat_c(aTHX_ sv, c);
-
-  while ((c = lex_peek_unichar(0)) != -1 && MY_UNI_IDCONT(c)) {
-    lex_read_unichar(0);
-    my_sv_cat_c(aTHX_ sv, c);
-  }
-
-  return sv;
-}
-
-static void
-scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, STRLEN *outstringlen)
+S_scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, STRLEN *outstringlen)
 {
   while (1) {
     char* const end = PL_parser->bufend;
@@ -78,7 +32,7 @@ scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, STR
 }
 
 static void
-parse_lua_block(pTHX_ OP **op_ptr)
+S_parse_lua_block(pTHX_ OP **op_ptr)
 {
   int save_ix;
   I32 c;
@@ -108,13 +62,7 @@ parse_lua_block(pTHX_ OP **op_ptr)
 
   lex_read_space(0);
 
-  /*
-  Newx(return_op, 1, OP *);
-  *return_op = NULL;
-  SAVEDESTRUCTOR_X(free_op, return_op);
-  */
-
-  scan_lua_block_delim(aTHX_ ndelimchars, &code_str, &code_len);
+  S_scan_lua_block_delim(aTHX_ ndelimchars, &code_str, &code_len);
   if (code_str == NULL)
     croak("Syntax error: cannot find Lua block delimiter");
 
@@ -157,7 +105,7 @@ pz_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) {
 
   if (keyword_len == 3 && memcmp(keyword_ptr, "lua", 3) == 0) {
     SAVETMPS;
-    parse_lua_block(aTHX_ op_ptr);
+    S_parse_lua_block(aTHX_ op_ptr);
     ret = KEYWORD_PLUGIN_STMT;
     FREETMPS;
   } else {
