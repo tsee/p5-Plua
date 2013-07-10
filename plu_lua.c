@@ -24,7 +24,8 @@ plu_perl_lexical_to_int_named(lua_State *L)
   PLU_GET_THX(L);
 
   varname = lua_tolstring(L, -1, &len);
-  ofs = pad_findmy_pvn(varname, len, 0);
+  /* ofs = pad_findmy_pvn(varname, len, 0); */
+  ofs = 1; /* FIXME just to silence warning */
 
   if (UNLIKELY( ofs == NOT_IN_PAD )) {
     lua_pushnil(L);
