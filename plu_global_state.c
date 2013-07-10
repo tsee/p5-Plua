@@ -4,6 +4,9 @@
 #include "plu_parse_kw.h"
 #include "plu_op.h"
 
+#include <lauxlib.h>
+#include <lualib.h>
+
 /* The Lua compiler/interpreter - FIXME ought to be in thread-local storage */
 lua_State *PLU_lua_int = NULL;
 

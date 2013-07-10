@@ -5,6 +5,7 @@
 
 #include "plu_debug.h"
 #include "plu_global_state.h"
+#include "plu_lua.h"
 
 OP *
 plu_pp_custom(pTHX)

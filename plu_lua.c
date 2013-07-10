@@ -6,7 +6,9 @@
 #include "plu_debug.h"
 #include "plu_global_state.h"
 
-#include "lua.h"
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 static SV *
 plu_get_lua_errmsg(pTHX)

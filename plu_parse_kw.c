@@ -34,10 +34,8 @@ S_scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, S
 static void
 S_parse_lua_block(pTHX_ OP **op_ptr)
 {
-  int save_ix;
   I32 c;
   SV *lua_code;
-  PADOFFSET test_padofs;
   unsigned int ndelimchars = 1;
   char *code_str;
   STRLEN code_len;
