@@ -21,10 +21,9 @@ pz_get_lua_errmsg(pTHX)
 }
 
 int
-pz_call_lua_func(pTHX_ void *lua_func)
+pz_call_lua_func(pTHX_ const char *lua_func_name)
 {
-  /* FIXME */
-  lua_pushcclosure(PZ_lua_int, lua_func, 1);
+  lua_getglobal(PZ_lua_int, lua_func_name);
   return lua_pcall(PZ_lua_int, 0, 0, 0);
 }
 

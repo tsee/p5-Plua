@@ -58,7 +58,7 @@ scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, STR
     char* const end = PL_parser->bufend;
     char *s = PL_parser->bufptr;
     unsigned int ndelim = 0;
-    while (end-s > ndelimchars) {
+    while (end-s >= ndelimchars) {
       if (*s == '}') {
         ndelim++;
         if (ndelim == ndelimchars) {

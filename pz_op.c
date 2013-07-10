@@ -13,12 +13,13 @@ pz_pp_custom(pTHX)
   pz_op_aux_t *aux;
   aux = (pz_op_aux_t *)PL_op->op_targ;
 
+  pz_call_lua_func(aTHX_ aux->lua_func_name);
   /*if (aux->test != NOT_IN_PAD) {
     SV *s = PAD_SVl(aux->test);
     sv_setiv_mg(s, SvIV(s)+1);
   }*/
 
-  PZ_DEBUG("Finished executing OP.\n");
+  /*PZ_DEBUG("Finished executing OP.\n");*/
   RETURN;
 }
 

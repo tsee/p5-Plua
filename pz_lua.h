@@ -8,7 +8,7 @@
 
 int pz_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len);
 
-/* returns status from executing lua_func. Uses global PZ_lua_int */
-int pz_call_lua_func(pTHX_ void *lua_func);
+/* returns status from executing lua_func_name. Uses global PZ_lua_int */
+int pz_call_lua_func(pTHX_ const char *lua_func_name);
 
 #endif
