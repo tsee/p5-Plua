@@ -3,12 +3,39 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "ppport.h"
+
 #include "plu_debug.h"
+#include "plu_perl_context.h"
 #include "plu_global_state.h"
 
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+
+static int
+plu_perl_lexical_to_int_named(lua_State *lua)
+{
+  PADOFFSET ofs;
+  const char * varname;
+  size_t len;
+  PLU_dTHX;
+
+  PLU_GET_THX(lua);
+
+  varname = lua_tolstring(lua, -1, &len);
+  ofs = pad_findmy_pvn(varname, len, 0);
+
+  if (UNLIKELY( ofs == NOT_IN_PAD )) {
+    lua_pushnil(lua);
+  }
+  else {
+    SV * const tmpsv = PAD_SV(ofs);
+    lua_pushinteger(lua, (lua_Integer)SvIV(tmpsv));
+  }
+
+  return 1;
+}
 
 lua_State *
 plu_new_lua_state(pTHX)
@@ -19,9 +46,15 @@ plu_new_lua_state(pTHX)
 
   /* C equivalent of Lua 'perl = {}' */
   lua_newtable(lua);
-  lua_setglobal(lua, "perl");
+  lua_setfield(lua, LUA_GLOBALSINDEX, "perl");
 
   luaL_openlibs(lua);
+
+  /* Install our Perl-interfacing functions */
+  lua_getfield(lua, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(lua);
+  lua_pushcclosure(lua, plu_perl_lexical_to_int_named, PLU_N_THX_ARGS);
+  lua_setfield(lua, -2, "value_as_int");
 
   return lua;
 }
