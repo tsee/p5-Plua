@@ -14,24 +14,24 @@
 #include <lauxlib.h>
 
 static int
-plu_perl_lexical_to_int_named(lua_State *lua)
+plu_perl_lexical_to_int_named(lua_State *L)
 {
   PADOFFSET ofs;
   const char * varname;
   size_t len;
   PLU_dTHX;
 
-  PLU_GET_THX(lua);
+  PLU_GET_THX(L);
 
-  varname = lua_tolstring(lua, -1, &len);
+  varname = lua_tolstring(L, -1, &len);
   ofs = pad_findmy_pvn(varname, len, 0);
 
   if (UNLIKELY( ofs == NOT_IN_PAD )) {
-    lua_pushnil(lua);
+    lua_pushnil(L);
   }
   else {
     SV * const tmpsv = PAD_SV(ofs);
-    lua_pushinteger(lua, (lua_Integer)SvIV(tmpsv));
+    lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
   }
 
   return 1;
@@ -40,23 +40,23 @@ plu_perl_lexical_to_int_named(lua_State *lua)
 lua_State *
 plu_new_lua_state(pTHX)
 {
-  lua_State *lua;
+  lua_State *L;
 
-  lua = luaL_newstate();
+  L= luaL_newstate();
 
   /* C equivalent of Lua 'perl = {}' */
-  lua_newtable(lua);
-  lua_setfield(lua, LUA_GLOBALSINDEX, "perl");
+  lua_newtable(L);
+  lua_setfield(L, LUA_GLOBALSINDEX, "perl");
 
-  luaL_openlibs(lua);
+  luaL_openlibs(L);
 
   /* Install our Perl-interfacing functions */
-  lua_getfield(lua, LUA_GLOBALSINDEX, "perl");
-  PLU_PUSH_THX(lua);
-  lua_pushcclosure(lua, plu_perl_lexical_to_int_named, PLU_N_THX_ARGS);
-  lua_setfield(lua, -2, "value_as_int");
+  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(L);
+  lua_pushcclosure(L, plu_perl_lexical_to_int_named, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "value_as_int");
 
-  return lua;
+  return L;
 }
 
 SV *
