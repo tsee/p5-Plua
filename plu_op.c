@@ -62,7 +62,7 @@ plu_op_free_hook(pTHX_ OP *o)
 
 
 OP *
-plu_prepare_custom_op(pTHX, const int lua_func_registry_idx)
+plu_prepare_custom_op(pTHX_ const int lua_func_registry_idx)
 {
   OP *op;
   plu_op_aux_t *aux;
