@@ -11,7 +11,7 @@
 static SV *
 pz_get_lua_errmsg(pTHX)
 {
-  char *str;
+  const char *str;
   size_t len;
   SV *errmsg;
   str = lua_tolstring(PZ_lua_int, -1, &len);
