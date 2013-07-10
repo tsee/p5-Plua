@@ -10,9 +10,7 @@
 /* The struct of pertinent per-OP instance
  * data that we attach to each OP. */
 typedef struct {
-  /* void (*fun)(void); */
-  PADOFFSET test;
-  void *lua_fun;
+  char *lua_func_name;
   PADOFFSET saved_op_targ; /* Replacement for custom OP's op_targ if necessary */
 } pz_op_aux_t;
 
@@ -23,6 +21,6 @@ OP *pz_pp_custom(pTHX);
 void pz_op_free_hook(pTHX_ OP *o);
 
 /* Set up OP without doing actual compilation. */
-OP *pz_prepare_custom_op(pTHX, void *lua_func);
+OP *pz_prepare_custom_op(pTHX, const char *lua_func_n);
 
 #endif

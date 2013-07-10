@@ -13,10 +13,10 @@ pz_pp_custom(pTHX)
   pz_op_aux_t *aux;
   aux = (pz_op_aux_t *)PL_op->op_targ;
 
-  if (aux->test != NOT_IN_PAD) {
+  /*if (aux->test != NOT_IN_PAD) {
     SV *s = PAD_SVl(aux->test);
     sv_setiv_mg(s, SvIV(s)+1);
-  }
+  }*/
 
   PZ_DEBUG("Finished executing OP.\n");
   RETURN;
@@ -37,14 +37,15 @@ pz_op_free_hook(pTHX_ OP *o)
   if (o->op_ppaddr == pz_pp_custom) {
     PZ_DEBUG("Cleaning up custom OP's pz_op_aux_t\n");
     pz_op_aux_t *aux = (pz_op_aux_t *)o->op_targ;
-    free(aux);
+    Safefree(aux->lua_func_name);
+    Safefree(aux);
     o->op_targ = 0; /* important or Perl will use it to access the pad */
   }
 }
 
 
 OP *
-pz_prepare_custom_op(pTHX, void *lua_func)
+pz_prepare_custom_op(pTHX, const char *lua_func_n)
 {
   OP *op;
   pz_op_aux_t *aux;
@@ -59,8 +60,8 @@ pz_prepare_custom_op(pTHX, void *lua_func)
   op->op_ppaddr = pz_pp_custom;
 
   /* Init aux struct */
-  aux = malloc(sizeof(pz_op_aux_t));
-  /* aux->jit_fun = NULL; */
+  Newx(aux, 1, pz_op_aux_t);
+  aux->lua_func_name = savepv(lua_func_n);
   aux->saved_op_targ = 0;
   /* aux->saved_op_targ = origop->op_targ; */ /* save in case needed for sassign optimization */
 

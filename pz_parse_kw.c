@@ -82,14 +82,13 @@ parse_lua_block(pTHX_ OP **op_ptr)
 {
   int save_ix;
   I32 c;
-  SV *delim;
   SV *lua_code;
   PADOFFSET test_padofs;
   unsigned int ndelimchars = 1;
   char *code_str;
   STRLEN code_len;
+  SV *lua_func_name_sv;
   int status;
-  void *lua_fun;
 
   lex_read_space(0);
 
@@ -119,15 +118,13 @@ parse_lua_block(pTHX_ OP **op_ptr)
   if (code_str == NULL)
     croak("Syntax error: cannot find Lua block delimiter");
 
-  lua_code = newSVpvf(
-    "function _prl%lu()\n",
-    (unsigned long)PZ_global_lua_func_count++
-  );
+  lua_func_name_sv = newSVpvf("_prl%lu", (unsigned long)PZ_global_lua_func_count++);
+  sv_2mortal(lua_func_name_sv); /* auto-cleanup on exception */
+  lua_code = newSVpvf("function %s()\n", SvPVX(lua_func_name_sv));
   sv_2mortal(lua_code); /* auto-cleanup on exception */
   sv_catpvn(lua_code, code_str, (STRLEN)code_len);
   sv_catpvs(lua_code, "\nend\n");
 
-  sv_dump(lua_code);
   code_str = SvPV(lua_code, code_len);
 
   pz_compile_lua_block_or_croak(aTHX_ code_str, code_len);
@@ -142,15 +139,14 @@ parse_lua_block(pTHX_ OP **op_ptr)
 
   /*status = lua_pcall(PZ_lua_int, 0, LUA_MULTRET, 0);*/
   status = lua_pcall(PZ_lua_int, 0, 0, 0);
-  if (status != 0) {
-    fprintf(stderr, "Failed to run script: %s\n", lua_tostring(PZ_lua_int, -1));
-  }
+  if (status != 0)
+    croak("Failed to run script: %s\n", lua_tostring(PZ_lua_int, -1));
 
   /* FIXME just playing... */
-  *op_ptr = pz_prepare_custom_op(aTHX_ lua_fun);
+  *op_ptr = pz_prepare_custom_op(aTHX_ SvPVX(lua_func_name_sv));
 
-  test_padofs = pad_findmy("$foo", 4, 0);
-  ((pz_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;
+  /*test_padofs = pad_findmy("$foo", 4, 0);
+  ((pz_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;*/
 }
  
 
