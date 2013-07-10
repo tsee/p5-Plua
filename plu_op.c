@@ -12,13 +12,29 @@ plu_pp_custom(pTHX)
 {
   dVAR; dSP;
   plu_op_aux_t *aux;
+  int status;
+
   aux = (plu_op_aux_t *)PL_op->op_targ;
 
-  plu_call_lua_func(aTHX_ aux->lua_func_name);
+  status = plu_call_lua_func(aTHX_ aux->lua_func_name);
+  switch (status) {
+    case 0:
+      break;
+    case LUA_ERRRUN:
+    case LUA_ERRMEM:
+    case LUA_ERRERR:
+      {
+        SV *err = plu_get_lua_errmsg(aTHX);
+        lua_pop(PLU_lua_int, 1);
+        croak("%s", SvPVX(err));
+        break;
+      }
+  }
   /*if (aux->test != NOT_IN_PAD) {
     SV *s = PAD_SVl(aux->test);
     sv_setiv_mg(s, SvIV(s)+1);
   }*/
+
 
   /*PLU_DEBUG("Finished executing OP.\n");*/
   RETURN;

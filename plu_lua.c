@@ -10,7 +10,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-static SV *
+SV *
 plu_get_lua_errmsg(pTHX)
 {
   const char *str;
@@ -25,7 +25,7 @@ plu_get_lua_errmsg(pTHX)
 int
 plu_call_lua_func(pTHX_ const char *lua_func_name)
 {
-  lua_getglobal(PLU_lua_int, lua_func_name);
+  lua_getfield(PLU_lua_int, LUA_GLOBALSINDEX, lua_func_name);
   return lua_pcall(PLU_lua_int, 0, 0, 0);
 }
 
