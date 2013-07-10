@@ -16,7 +16,7 @@ plu_pp_custom(pTHX)
 
   aux = (plu_op_aux_t *)PL_op->op_targ;
 
-  status = plu_call_lua_func(aTHX_ aux->lua_func_name);
+  status = plu_call_lua_func_via_registry(aTHX_ aux->func_registry_idx);
   switch (status) {
     case 0:
       break;
@@ -55,7 +55,6 @@ plu_op_free_hook(pTHX_ OP *o)
   if (o->op_ppaddr == plu_pp_custom) {
     PLU_DEBUG("Cleaning up custom OP's plu_op_aux_t\n");
     plu_op_aux_t *aux = (plu_op_aux_t *)o->op_targ;
-    Safefree(aux->lua_func_name);
     Safefree(aux);
     o->op_targ = 0; /* important or Perl will use it to access the pad */
   }
@@ -63,7 +62,7 @@ plu_op_free_hook(pTHX_ OP *o)
 
 
 OP *
-plu_prepare_custom_op(pTHX, const char *lua_func_n)
+plu_prepare_custom_op(pTHX, const int lua_func_registry_idx)
 {
   OP *op;
   plu_op_aux_t *aux;
@@ -79,7 +78,7 @@ plu_prepare_custom_op(pTHX, const char *lua_func_n)
 
   /* Init aux struct */
   Newx(aux, 1, plu_op_aux_t);
-  aux->lua_func_name = savepv(lua_func_n);
+  aux->func_registry_idx = lua_func_registry_idx;
   aux->saved_op_targ = 0;
   /* aux->saved_op_targ = origop->op_targ; */ /* save in case needed for sassign optimization */
 

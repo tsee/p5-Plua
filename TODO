@@ -13,3 +13,5 @@ TODO!
 - Find a way to avoid having to create full-blown Lua functions out of snippets
   and correspondingly find a more efficient way of executing them than lua_getglobal
   (IOW lookup by name).
+  => Update: Now using Lua references for this. Quite a bit cleaner, but no more
+     efficient. Guess that'll be the best we can do for now.

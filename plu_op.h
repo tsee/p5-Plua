@@ -10,7 +10,7 @@
 /* The struct of pertinent per-OP instance
  * data that we attach to each OP. */
 typedef struct {
-  char *lua_func_name;
+  int func_registry_idx;
   PADOFFSET saved_op_targ; /* Replacement for custom OP's op_targ if necessary */
 } plu_op_aux_t;
 
@@ -21,6 +21,6 @@ OP *plu_pp_custom(pTHX);
 void plu_op_free_hook(pTHX_ OP *o);
 
 /* Set up OP without doing actual compilation. */
-OP *plu_prepare_custom_op(pTHX, const char *lua_func_n);
+OP *plu_prepare_custom_op(pTHX, const int lua_func_registry_idx);
 
 #endif

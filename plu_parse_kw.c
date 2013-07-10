@@ -5,6 +5,10 @@
 #include "plu_op.h"
 #include "plu_lua.h"
 
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+
 static void
 S_scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, STRLEN *outstringlen)
 {
@@ -35,12 +39,10 @@ static void
 S_parse_lua_block(pTHX_ OP **op_ptr)
 {
   I32 c;
-  SV *lua_code;
   unsigned int ndelimchars = 1;
   char *code_str;
   STRLEN code_len;
-  SV *lua_func_name_sv;
-  int status;
+  int lua_reg_idx;
 
   lex_read_space(0);
 
@@ -65,32 +67,10 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   if (code_str == NULL)
     croak("Syntax error: cannot find Lua block delimiter");
 
-  lua_func_name_sv = newSVpvf("_prl%lu", (unsigned long)PLU_global_lua_func_count++);
-  sv_2mortal(lua_func_name_sv); /* auto-cleanup on exception */
-  lua_code = newSVpvf("function %s()\n", SvPVX(lua_func_name_sv));
-  sv_2mortal(lua_code); /* auto-cleanup on exception */
-  sv_catpvn(lua_code, code_str, (STRLEN)code_len);
-  sv_catpvs(lua_code, "\nend\n");
-
-  code_str = SvPV(lua_code, code_len);
-
   plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);
-  /*printf("'%s'\n", lua_typename(PLU_lua_int, lua_type(PLU_lua_int, -1)));*/
-  /*sv_dump(lua_code);*/
+  lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX);
 
-  /* FIXME just taking the pointer to a Lua function off of the stack doesn't cut
-   * it as there seems to be no way to put it back and execute it :( */
-  /*lua_fun = (void *)lua_topointer(PLU_lua_int, -1);
-  lua_pop(PLU_lua_int, 1);
-  */
-
-  /*status = lua_pcall(PLU_lua_int, 0, LUA_MULTRET, 0);*/
-  status = lua_pcall(PLU_lua_int, 0, 0, 0);
-  if (status != 0)
-    croak("Failed to run script: %s\n", lua_tostring(PLU_lua_int, -1));
-
-  /* FIXME just playing... */
-  *op_ptr = plu_prepare_custom_op(aTHX_ SvPVX(lua_func_name_sv));
+  *op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);
 
   /*test_padofs = pad_findmy("$foo", 4, 0);
   ((plu_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;*/

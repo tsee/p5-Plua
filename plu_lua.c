@@ -45,6 +45,15 @@ plu_call_lua_func(pTHX_ const char *lua_func_name)
   return lua_pcall(PLU_lua_int, 0, 0, 0);
 }
 
+int
+plu_call_lua_func_via_registry(pTHX_ const int registry_idx)
+{
+  /* Put our Lua function on the Lua stack by
+   * fetching it from the Lua registry; then execute */
+  lua_rawgeti(PLU_lua_int, LUA_REGISTRYINDEX, registry_idx);
+  return lua_pcall(PLU_lua_int, 0, 0, 0);
+}
+
 
 int
 plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len)
