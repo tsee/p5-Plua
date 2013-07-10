@@ -70,7 +70,10 @@ sub standard_deviation {
 }
   
 
-if (not @ARGV > 1) {
+# 0 == Perl loop, Lua function
+# 1 == Perl loop, Perl function
+# 2 == Lua loop, Lua function
+if (not(@ARGV > 1) || $ARGV[1] == 0) {
   for (1..($ARGV[0] || 10000)) {
     lua {{
       local foo = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -80,13 +83,24 @@ if (not @ARGV > 1) {
     }}
   }
 }
-else {
+elsif ($ARGV[1] == 1) {
   for (1..($ARGV[0] || 10000)) {
     my $ary = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
                 39, 40 ];
     my $std = standard_deviation($ary);
   }
+}
+else {
+  my $n = $ARGV[0] || 10000;
+  lua {{
+    for i = 1, $n.int, 1 do
+      local foo = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                   21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+                   39, 40 }
+      local std = stats.standardDeviation(foo)
+    end
+  }}
 }
 
 pass("Alive");

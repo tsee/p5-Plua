@@ -2,8 +2,38 @@ package PLua;
 use 5.14.0;
 use strict;
 
+use Carp qw(croak);
 use XSLoader;
+
 our $VERSION = '0.01';
+
+SCOPE: {
+  my $ident = qr/[a-zA-Z0-9_]+/;
+  my $methods = qr/int/; # TODO implement num/str conversion (and complex types)
+  #my $methods = qr/int|num|str/;
+
+  sub _scan_lua_code {
+    # Lua code may be modified in-place in $_[0]
+    my %lexicals;
+    while ($_[0] =~ /(\$$ident)\.(?:$methods)\b/go) {
+      $lexicals{$1} = undef;
+    }
+    # Must return hashref or else boom!
+    return \%lexicals;
+  }
+
+  sub _munge_lua_code {
+    # Lua code WILL be modified in-place in $_[0]
+    # Filled lexical lookup hash in $_[1]
+    my $lexicals = $_[1] || {};
+    $_[0] =~ s/(\$$ident)\.($methods)\b/
+        not(defined($lexicals->{$1}))
+          ? croak("Could not find Perl lexical with name '$1' referenced from Lua block")
+          : "perl.var_to_$2(" . $lexicals->{$1} . ")"
+      /goe;
+  }
+}
+
 XSLoader::load;
 
 1;

@@ -14,18 +14,15 @@
 #include <lauxlib.h>
 
 static int
-plu_perl_lexical_to_int_named(lua_State *L)
+plu_perl_lexical_to_int(lua_State *L)
 {
   PADOFFSET ofs;
-  const char * varname;
-  size_t len;
   PLU_dTHX;
 
   PLU_GET_THX(L);
 
-  varname = lua_tolstring(L, -1, &len);
-  /* ofs = pad_findmy_pvn(varname, len, 0); */
-  ofs = 1; /* FIXME just to silence warning */
+  /* FIXME check that it's an integer */
+  ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   if (UNLIKELY( ofs == NOT_IN_PAD )) {
     lua_pushnil(L);
@@ -54,8 +51,8 @@ plu_new_lua_state(pTHX)
   /* Install our Perl-interfacing functions */
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, plu_perl_lexical_to_int_named, PLU_N_THX_ARGS);
-  lua_setfield(L, -2, "value_as_int");
+  lua_pushcclosure(L, plu_perl_lexical_to_int, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "var_to_int");
 
   return L;
 }
