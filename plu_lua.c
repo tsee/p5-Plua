@@ -21,7 +21,7 @@ plu_new_lua_state(pTHX)
   lua_newtable(lua);
   lua_setglobal(lua, "perl");
 
-  luaL_openlibs(PLU_lua_int);
+  luaL_openlibs(lua);
 
   return lua;
 }
