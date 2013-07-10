@@ -6,6 +6,11 @@
 #include <EXTERN.h>
 #include <perl.h>
 
+#include <lua.h>
+
+/* Create new Lua interpreter and initialize it */
+lua_State *plu_new_lua_state(pTHX);
+
 int plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len);
 
 /* Returns status from executing lua_func_name. Uses global PLU_lua_int */

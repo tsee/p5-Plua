@@ -10,6 +10,22 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+lua_State *
+plu_new_lua_state(pTHX)
+{
+  lua_State *lua;
+
+  lua = luaL_newstate();
+
+  /* C equivalent of Lua 'perl = {}' */
+  lua_newtable(lua);
+  lua_setglobal(lua, "perl");
+
+  luaL_openlibs(PLU_lua_int);
+
+  return lua;
+}
+
 SV *
 plu_get_lua_errmsg(pTHX)
 {
