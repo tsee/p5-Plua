@@ -10,6 +10,9 @@ lua_State *PZ_lua_int = NULL;
 XOP PZ_xop;
 Perl_ophook_t PZ_orig_opfreehook;
 
+/* The sequence number of all Perl/Lua binding Lua functions */
+unsigned long PZ_global_lua_func_count = 27; /* let's not start at 0 to avoid easy collision */
+
 /* For chaining the actual keyword plugin */
 int (*PZ_next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 

@@ -14,6 +14,9 @@ extern lua_State *PZ_lua_int;
 /* The custom op definition structure */
 extern XOP PZ_xop;
 
+/* The sequence number of all Perl/Lua binding Lua functions */
+extern unsigned long PZ_global_lua_func_count;
+
 /* For chaining the actual keyword plugin */
 extern int (*PZ_next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 

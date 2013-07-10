@@ -3,6 +3,7 @@
 
 #include "pz_global_state.h"
 #include "pz_op.h"
+#include "pz_lua.h"
 
 static void
 free_op(pTHX_ void *ptr) {
@@ -50,10 +51,10 @@ my_scan_word(pTHX) {
   return sv;
 }
 
-static SV *
-scan_lua_block_delim(pTHX_ const unsigned int ndelimchars)
+static void
+scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, STRLEN *outstringlen)
 {
-  while(1) {
+  while (1) {
     char* const end = PL_parser->bufend;
     char *s = PL_parser->bufptr;
     unsigned int ndelim = 0;
@@ -61,29 +62,19 @@ scan_lua_block_delim(pTHX_ const unsigned int ndelimchars)
       if (*s == '}') {
         ndelim++;
         if (ndelim == ndelimchars) {
-          SV *rv;
-          rv = sv_2mortal(newSVpvn(PL_parser->bufptr, s - PL_parser->bufptr - ndelimchars+1));
+          *outstring = PL_parser->bufptr;
+          *outstringlen = (STRLEN)(s - PL_parser->bufptr - ndelimchars);
           lex_read_to(s+1); /* skip Perl's lexer/parser ahead to end of Lua block */
-          return rv;
+          return;
         }
       }
-      else {
+      else
         ndelim = 0;
-      }
       s++;
     }
     if ( !lex_next_chunk(LEX_KEEP_PREVIOUS) )
       croak("Syntax error: cannot find Lua block delimiter");
   }
-  return NULL;
-}
-
-static int
-compile_lua_block(pTHX_ char *code, STRLEN len)
-{
-  int status;
-  status = luaL_loadbuffer(PZ_lua_int, code, len, "_INLINED_LUA");
-  return status;
 }
 
 static void
@@ -97,7 +88,7 @@ parse_lua_block(pTHX_ OP **op_ptr)
   unsigned int ndelimchars = 1;
   char *code_str;
   STRLEN code_len;
-  int compile_status;
+  int status;
   void *lua_fun;
 
   lex_read_space(0);
@@ -124,31 +115,39 @@ parse_lua_block(pTHX_ OP **op_ptr)
   SAVEDESTRUCTOR_X(free_op, return_op);
   */
 
-  lua_code = scan_lua_block_delim(aTHX_ ndelimchars);
+  scan_lua_block_delim(aTHX_ ndelimchars, &code_str, &code_len);
+  if (code_str == NULL)
+    croak("Syntax error: cannot find Lua block delimiter");
+
+  lua_code = newSVpvf(
+    "function _prl%lu()\n",
+    (unsigned long)PZ_global_lua_func_count++
+  );
+  sv_2mortal(lua_code); /* auto-cleanup on exception */
+  sv_catpvn(lua_code, code_str, (STRLEN)code_len);
+  sv_catpvs(lua_code, "\nend\n");
+
+  sv_dump(lua_code);
   code_str = SvPV(lua_code, code_len);
-  compile_status = compile_lua_block(aTHX_ code_str, code_len);
-  switch (compile_status) {
-  case 0:
-    break;
-  case LUA_ERRSYNTAX:
-  default:
-    croak("Couldn't compile inline code");
-  }
+
+  pz_compile_lua_block_or_croak(aTHX_ code_str, code_len);
   /*printf("'%s'\n", lua_typename(PZ_lua_int, lua_type(PZ_lua_int, -1)));*/
   /*sv_dump(lua_code);*/
 
-  lua_fun = lua_topointer(PZ_lua_int, -1);
+  /* FIXME just taking the pointer to a Lua function off of the stack doesn't cut
+   * it as there seems to be no way to put it back and execute it :( */
+  /*lua_fun = (void *)lua_topointer(PZ_lua_int, -1);
   lua_pop(PZ_lua_int, 1);
-  /*compile_status = lua_pcall(PZ_lua_int, 0, LUA_MULTRET, 0);*/
-  /*
-  compile_status = lua_pcall(PZ_lua_int, 0, 0, 0);
-  if (compile_status != 0) {
-    fprintf(stderr, "Failed to run script: %s\n", lua_tostring(PZ_lua_int, -1));
-  }
   */
 
+  /*status = lua_pcall(PZ_lua_int, 0, LUA_MULTRET, 0);*/
+  status = lua_pcall(PZ_lua_int, 0, 0, 0);
+  if (status != 0) {
+    fprintf(stderr, "Failed to run script: %s\n", lua_tostring(PZ_lua_int, -1));
+  }
+
   /* FIXME just playing... */
-  *op_ptr = pz_prepare_custom_op(aTHX, lua_fun);
+  *op_ptr = pz_prepare_custom_op(aTHX_ lua_fun);
 
   test_padofs = pad_findmy("$foo", 4, 0);
   ((pz_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;
