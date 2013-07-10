@@ -6,13 +6,13 @@
 #include <string.h>
 #include <assert.h>
 
-#include "pz_debug.h"
-#include "pz_inline.h"
-#include "pz_global_state.h"
+#include "plu_debug.h"
+#include "plu_inline.h"
+#include "plu_global_state.h"
 
-MODULE = PZoom PACKAGE = PZoom
+MODULE = PLua PACKAGE = PLua
 PROTOTYPES: ENABLE
 
 BOOT:
-  pz_init_global_state(aTHX);
+  plu_init_global_state(aTHX);
 

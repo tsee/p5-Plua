@@ -4,9 +4,9 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  NAME                => 'PZoom',
+  NAME                => 'PLua',
   AUTHOR              => q{Steffen Mueller <smueller@cpan.org>},
-  VERSION_FROM        => 'lib/PZoom.pm',
+  VERSION_FROM        => 'lib/PLua.pm',
   CONFIGURE_REQUIRES => {
     'ExtUtils::MakeMaker' => '6.56',
   },
@@ -24,18 +24,20 @@ WriteMakefile(
     'meta-spec' => { version => 2 },
     resources => {
       repository => {
-        url => 'git://github.com/tsee/p5-PZoom.git',
-        web => 'https://github.com/tsee/p5-PZoom',
+        url => 'git://github.com/tsee/p5-PLua.git',
+        web => 'https://github.com/tsee/p5-PLua',
         type => 'git',
       },
     },
   },
   depend => { Makefile => '$(VERSION_FROM)' },
   dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-  clean => { FILES => 'PZoom-*' },
-  #LIBS              => ['-Ltcc-install/lib', '-ltcc'], # e.g., '-lm'
+  clean => { FILES => 'PLua-*' },
   DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
-  INC               => '-I. -Isrc',
+  LIBS              => ['-lluajit-5.1'], # e.g., '-lm'
+  INC               => '-I.',
+  #LIBS              => ['-L/home/tsee/perl/luajit-install/lib -lluajit-5.1'], # e.g., '-lm'
+  #INC               => '-I/home/tsee/perl/luajit-install/include/luajit-2.0 -I.',
   #OPTIMIZE          => $OPTIMIZE,
   OBJECT            => '$(O_FILES)',
 );

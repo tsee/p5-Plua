@@ -5,11 +5,11 @@ Makefile
 Makefile.old
 Makefile.back
 *.bs
-PZoom.c
+PLua.c
 *.o
 blib/
 pm_to_blib
 *.tar.gz
-/PZoom-*/
+/PLua-*/
 *.swp
 *.swo

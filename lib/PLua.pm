@@ -1,4 +1,4 @@
-package PZoom;
+package PLua;
 use 5.14.0;
 use strict;
 
@@ -11,12 +11,12 @@ __END__
 
 =head1 NAME
 
-PZoom - blah
+PLua - blah
 
 =head1 SYNOPSIS
 
-  use PZoom;
-r.
+  use PLua;
+
 =head1 DESCRIPTION
 
 =head1 AUTHOR

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Test::More tests => 1;
-use PZoom;
+use PLua;
 
 # Run some simple math in Lua (hint: some 10x faster on my laptop for 1e6 iterations)
 
