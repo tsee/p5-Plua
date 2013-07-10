@@ -1,9 +1,11 @@
 #include "plu_global_state.h"
 #include "plu_debug.h"
+#include "plu_inline.h"
 
 #include "plu_parse_kw.h"
 #include "plu_op.h"
 
+#include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -18,6 +20,20 @@ unsigned long PLU_global_lua_func_count = 27; /* let's not start at 0 to avoid e
 
 /* For chaining the actual keyword plugin */
 int (*PLU_next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
+
+PLU_STATIC_INLINE lua_State *
+plu_new_lua_state(pTHX)
+{
+  lua_State *lua;
+
+  lua = luaL_newstate();
+
+  /* Equivalent of 'perl = {}' */
+  lua_newtable(lua);
+  lua_setglobal(lua, "perl");
+
+  return lua;
+}
 
 void
 plu_init_global_state(pTHX)
@@ -37,7 +53,7 @@ plu_init_global_state(pTHX)
   Perl_custom_op_register(aTHX_ plu_pp_custom, &PLU_xop);
 
   /* Init Lua compiler/interpreter */
-  PLU_lua_int = luaL_newstate();
+  PLU_lua_int = plu_new_lua_state(aTHX);
   luaL_openlibs(PLU_lua_int);
 
   /* Register super-late global cleanup hook for global state */
