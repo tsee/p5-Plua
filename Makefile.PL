@@ -3,6 +3,14 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
+my $OPTIMIZE;
+if ($ENV{DEBUG}) {
+  $OPTIMIZE = '-DDEBUG -O0 -Wall -Wextra';
+}
+else {
+  $OPTIMIZE = '-DNDEBUG';
+}
+
 WriteMakefile(
   NAME                => 'PLua',
   AUTHOR              => q{Steffen Mueller <smueller@cpan.org>},
@@ -38,6 +46,6 @@ WriteMakefile(
   INC               => '-I.',
   #LIBS              => ['-L/home/tsee/perl/luajit-install/lib -lluajit-5.1'], # e.g., '-lm'
   #INC               => '-I/home/tsee/perl/luajit-install/include/luajit-2.0 -I.',
-  #OPTIMIZE          => $OPTIMIZE,
+  OPTIMIZE          => $OPTIMIZE,
   OBJECT            => '$(O_FILES)',
 );
