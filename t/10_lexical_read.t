@@ -5,7 +5,7 @@ use PLua;
 
 # Manual test output so we can easily mix Lua and Perl printing of tests
 
-print "1..3\n";
+print "1..4\n";
 
 my $integer = 42;
 lua {
@@ -24,6 +24,16 @@ lua {
     print("ok - Lua sees Perl number")
   else
     print("not ok - Lua sees Perl number")
+  end
+}
+
+my $string = "fooo";
+lua {
+  local f = $string.str
+  if f == "fooo" then
+    print("ok - Lua sees Perl string")
+  else
+    print("not ok - Lua sees Perl string")
   end
 }
 

@@ -9,8 +9,7 @@ our $VERSION = '0.01';
 
 SCOPE: {
   my $ident = qr/[a-zA-Z0-9_]+/;
-  my $methods = qr/int|num/; # TODO implement str conversion (and complex types)
-  #my $methods = qr/int|num|str/;
+  my $methods = qr/int|num|str/;
 
   sub _scan_lua_code {
     # Lua code may be modified in-place in $_[0]

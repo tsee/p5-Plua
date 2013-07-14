@@ -61,6 +61,33 @@ plu_perl_lexical_to_number(lua_State *L)
 }
 
 
+/* Convert lexical Perl SV to lua_Number on Lua stack */
+static int
+plu_perl_lexical_to_string(lua_State *L)
+{
+  PADOFFSET ofs;
+  PLU_dTHX;
+
+  PLU_GET_THX(L);
+
+  /* FIXME check that it's an integer? */
+  ofs = (PADOFFSET)lua_tointeger(L, -1);
+
+  if (UNLIKELY( ofs == NOT_IN_PAD )) {
+    lua_pushnil(L);
+  }
+  else {
+    STRLEN len;
+    char *str;
+    SV * const tmpsv = PAD_SV(ofs);
+    str = SvPV(tmpsv, len);
+    lua_pushlstring(L, str, (size_t)len);
+  }
+
+  return 1;
+}
+
+
 lua_State *
 plu_new_lua_state(pTHX)
 {
@@ -84,6 +111,11 @@ plu_new_lua_state(pTHX)
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, plu_perl_lexical_to_number, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_num");
+
+  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(L);
+  lua_pushcclosure(L, plu_perl_lexical_to_string, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "var_to_str");
 
   return L;
 }
