@@ -15,6 +15,9 @@ use Benchmark::Dumb qw(cmpthese);
 # Quite surprising that crossing over into Lua and looking at Perl lexicals (scalars) from
 # there is a bit faster than staying in Perl!
 #
+# Update: now access to lexicals should be even faster than listed below. Just haven't rerun
+#         the benchmark.
+#
 #                           Rate     perl_only perl_loop_lua_lex lua_perl_lex lua_only
 #perl_only            762+-1.5/s            --            -21.6%       -62.1%   -99.5%
 #perl_loop_lua_lex  971.8+-2.6/s  27.53+-0.42%                --       -51.7%   -99.3%

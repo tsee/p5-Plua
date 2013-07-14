@@ -69,8 +69,10 @@ plu_munge_lua_code(pTHX_ SV *lcode)
     name = *av_fetch(lexical_ary, i, 0);
     str = SvPV(name, len);
     padoff = pad_findmy(str, len, 0);
-    if (padoff != NOT_IN_PAD)
+    if (LIKELY( padoff != NOT_IN_PAD ))
       (void)hv_store(lexical_hv, str, len, newSViv(padoff), 0);
+    /* No else needed - skipping from HV will cause exception in
+     * Perl code called further down. */
   }
 
   /* Now actually munge the code based on the PAD lookups. */

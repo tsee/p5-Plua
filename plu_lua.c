@@ -25,13 +25,10 @@ plu_perl_lexical_to_integer(lua_State *L)
   /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
-  if (UNLIKELY( ofs == NOT_IN_PAD )) {
-    lua_pushnil(L);
-  }
-  else {
-    SV * const tmpsv = PAD_SV(ofs);
-    lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
-  }
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+  SV * const tmpsv = PAD_SV(ofs);
+  lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
 
   return 1;
 }
@@ -49,13 +46,10 @@ plu_perl_lexical_to_number(lua_State *L)
   /* FIXME check that it's a integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
-  if (UNLIKELY( ofs == NOT_IN_PAD )) {
-    lua_pushnil(L);
-  }
-  else {
-    SV * const tmpsv = PAD_SV(ofs);
-    lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
-  }
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+  SV * const tmpsv = PAD_SV(ofs);
+  lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
 
   return 1;
 }
@@ -73,10 +67,9 @@ plu_perl_lexical_to_string(lua_State *L)
   /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
-  if (UNLIKELY( ofs == NOT_IN_PAD )) {
-    lua_pushnil(L);
-  }
-  else {
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+  {
     STRLEN len;
     char *str;
     SV * const tmpsv = PAD_SV(ofs);
