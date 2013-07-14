@@ -14,7 +14,7 @@ lua_State *plu_new_lua_state(pTHX);
 int plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len);
 
 /* Returns status from executing lua_func_name. Uses global PLU_lua_int */
-int plu_call_lua_func(pTHX_ const char *lua_func_name);
+/* int plu_call_lua_func(pTHX_ const char *lua_func_name); */
 
 /* Returns status from executing Lua func (previous stored in registry).
  * Uses global PLU_lua_int */
