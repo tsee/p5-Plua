@@ -9,12 +9,13 @@ our $VERSION = '0.01';
 
 SCOPE: {
   my $ident = qr/[a-zA-Z0-9_]+/;
-  my $methods = qr/int|num|str/;
+  my $get_methods = qr/int|num|str/;
+  my $set_methods = qr/set\s*\(\s*($ident)\s*\)/;
 
   sub _scan_lua_code {
     # Lua code may be modified in-place in $_[0]
     my %lexicals;
-    while ($_[0] =~ /(\$$ident)\.(?:$methods)\b/go) {
+    while ($_[0] =~ /(\$$ident)\.(?:$get_methods|$set_methods/go) {
       $lexicals{$1} = undef;
     }
     # Must return hashref or else boom!
@@ -25,10 +26,16 @@ SCOPE: {
     # Lua code WILL be modified in-place in $_[0]
     # Filled lexical lookup hash in $_[1]
     my $lexicals = $_[1] || {};
-    $_[0] =~ s/(\$$ident)\.($methods)\b/
+    $_[0] =~ s/(\$$ident)\.($get_methods)\b/
         not(defined($lexicals->{$1}))
           ? croak("Could not find Perl lexical with name '$1' referenced from Lua block")
           : "perl.var_to_$2(" . $lexicals->{$1} . ")"
+      /goe;
+
+    $_[0] =~ s/(\$$ident)\.$set_methods\b/
+        not(defined($lexicals->{$1}))
+          ? croak("Could not find Perl lexical with name '$1' referenced from Lua block")
+          : "perl.lua_val_to_sv(" . $lexicals->{$1} . ", $2)"
       /goe;
   }
 }
@@ -40,13 +47,28 @@ __END__
 
 =head1 NAME
 
-PLua - blah
+PLua - Perl and Lua Make a Great Couple!
 
 =head1 SYNOPSIS
 
   use PLua;
 
+  my $foo = 12.3;
+  lua {
+    local bar = $foo.num
+    ...
+    $foo.set(bar)
+  }
+  
+  etc.
+
 =head1 DESCRIPTION
+
+This Perl module aims at providing seamless integration between Perl and Lua.
+At any place in your Perl code, you can now embed blocks of Lua code and from
+within, access your Perl lexicals!
+
+TODO write more documentation!
 
 =head1 AUTHOR
 
