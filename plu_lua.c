@@ -35,6 +35,30 @@ plu_perl_lexical_to_integer(lua_State *L)
   return 1;
 }
 
+
+static int
+plu_perl_lexical_to_number(lua_State *L)
+{
+  PADOFFSET ofs;
+  PLU_dTHX;
+
+  PLU_GET_THX(L);
+
+  /* FIXME check that it's a integer? */
+  ofs = (PADOFFSET)lua_tointeger(L, -1);
+
+  if (UNLIKELY( ofs == NOT_IN_PAD )) {
+    lua_pushnil(L);
+  }
+  else {
+    SV * const tmpsv = PAD_SV(ofs);
+    lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
+  }
+
+  return 1;
+}
+
+
 lua_State *
 plu_new_lua_state(pTHX)
 {
@@ -53,6 +77,11 @@ plu_new_lua_state(pTHX)
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, plu_perl_lexical_to_integer, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_int");
+
+  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(L);
+  lua_pushcclosure(L, plu_perl_lexical_to_number, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "var_to_num");
 
   return L;
 }
