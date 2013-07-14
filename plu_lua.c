@@ -13,6 +13,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+/* Convert lexical Perl SV to lua_Integer on Lua stack */
 static int
 plu_perl_lexical_to_integer(lua_State *L)
 {
@@ -36,6 +37,7 @@ plu_perl_lexical_to_integer(lua_State *L)
 }
 
 
+/* Convert lexical Perl SV to lua_Number on Lua stack */
 static int
 plu_perl_lexical_to_number(lua_State *L)
 {
