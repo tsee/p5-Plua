@@ -10,10 +10,7 @@ TODO!
      $foo.int, $foo.num, $foo.str all get compiled to a Lua C
      function call that uses the PAD offset (determined at compile
      time) to fetch the Perl lexical value.
-  => Still todo: Setting Perl lexicals. Convert access to non-existant
-     Perl lexicals to exceptions instead of returning Lua nil
-     (easy once the exception semantics of the two languages have
-     been full worked out).
+  => Still todo: Setting Perl lexicals.
 - The reverse?
 - Improved scanning/lexing for finding the end of the Lua blocks.
 - Wrapping Lua functions for Perl
