@@ -81,6 +81,56 @@ plu_perl_lexical_to_string(lua_State *L)
 }
 
 
+static int
+plu_lua_to_perl_lexical(lua_State *L)
+{
+  PADOFFSET ofs;
+  int ltype;
+  PLU_dTHX;
+  SV *sv;
+
+  PLU_GET_THX(L);
+
+  /* FIXME check that it's an integer? */
+  ofs = (PADOFFSET)lua_tointeger(L, -2);
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+
+  sv = PAD_SVl(ofs);
+  ltype = lua_type(L, -1);
+  switch (ltype) {
+  case LUA_TNUMBER:
+    sv_setnv_mg(sv, lua_tonumber(L, -1));
+    break;
+  case LUA_TBOOLEAN:
+    sv_setiv_mg(sv, lua_toboolean(L, -1));
+    break;
+  case LUA_TSTRING:
+    {
+      size_t len;
+      const char *str = lua_tolstring(L, -1, &len);
+      sv_setpvn_mg(sv, str, (STRLEN)len);
+      break;
+    }
+  case LUA_TNIL:
+    sv_setsv(sv, &PL_sv_undef);
+    break;
+  case LUA_TFUNCTION:
+  case LUA_TTABLE:
+  case LUA_TUSERDATA:
+  case LUA_TTHREAD:
+  case LUA_TLIGHTUSERDATA:
+  case LUA_TNONE:
+  default:
+    luaL_error(L, "Lua variables of type '%s' currently "
+                  "cannot be converted to Perl scalars", lua_typename(L, ltype));
+    break;
+  }
+
+  return 0;
+}
+
+
 lua_State *
 plu_new_lua_state(pTHX)
 {
@@ -109,6 +159,11 @@ plu_new_lua_state(pTHX)
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, plu_perl_lexical_to_string, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_str");
+
+  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(L);
+  lua_pushcclosure(L, plu_lua_to_perl_lexical, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "lua_val_to_sv");
 
   return L;
 }

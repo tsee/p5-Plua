@@ -66,6 +66,7 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   lex_read_space(0);
 
   S_scan_lua_block_delim(aTHX_ ndelimchars, &code_str, &code_len);
+
   if (code_str == NULL)
     croak("Syntax error: cannot find Lua block delimiter");
   lua_code_sv = sv_2mortal(newSVpvn(code_str, code_len));
@@ -73,8 +74,9 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   code_str = SvPV(lua_code_sv, code_len);
 
   plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);
-  lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX);
 
+  /* Get registry index for the just-compiled function */
+  lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX);
   *op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);
 
   /*test_padofs = pad_findmy("$foo", 4, 0);
