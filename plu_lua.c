@@ -14,14 +14,14 @@
 #include <lauxlib.h>
 
 static int
-plu_perl_lexical_to_int(lua_State *L)
+plu_perl_lexical_to_integer(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
 
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer */
+  /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   if (UNLIKELY( ofs == NOT_IN_PAD )) {
@@ -51,7 +51,7 @@ plu_new_lua_state(pTHX)
   /* Install our Perl-interfacing functions */
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, plu_perl_lexical_to_int, PLU_N_THX_ARGS);
+  lua_pushcclosure(L, plu_perl_lexical_to_integer, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_int");
 
   return L;
