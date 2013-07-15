@@ -85,6 +85,52 @@ S_plu_perl_lexical_to_string(lua_State *L)
 }
 
 
+/* Convert lexical Perl AV to lua_Table of integers on Lua stack */
+/* FIXME untested. Also: It's unclear whether this is the right
+ *       approach to begin with. Requires something like "@foo.int"
+ *       or so. How does this generalize to return values? */
+static int
+S_plu_perl_lexical_array_to_integer_table(lua_State *L)
+{
+  PADOFFSET ofs;
+  PLU_dTHX;
+
+  PLU_GET_THX(L);
+
+  /* FIXME check that it's an integer? */
+  ofs = (PADOFFSET)lua_tointeger(L, -1);
+
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+  {
+    size_t i, n;
+    AV * av;
+    SV **ptr;
+    SV * const tmpsv = PAD_SV(ofs);
+    if (SvTYPE(tmpsv) != SVt_PVAV) {
+      /* FIXME move error to compile time! */
+      luaL_error(L, "Invalid access to Perl value: Not a lexical array");
+    }
+    av = (AV *)tmpsv;
+
+    lua_newtable(L);
+
+    n = (size_t)av_len(av)+1;
+    for (i = 0; i < n; ++i) {
+      ptr = av_fetch(av, i, FALSE);
+      lua_pushinteger(L, (lua_Integer)i+1);
+      if (LIKELY( ptr != NULL ))
+        lua_pushinteger(L, (lua_Integer)SvIV(*ptr));
+      else
+          lua_pushnil(L);
+      lua_settable(L, -3);
+    }
+  }
+
+  return 1;
+}
+
+
 static int
 S_plu_lua_to_perl_lexical(lua_State *L)
 {
