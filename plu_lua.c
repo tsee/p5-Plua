@@ -27,8 +27,10 @@ S_plu_perl_lexical_to_integer(lua_State *L)
 
   /* NOT_IN_PAD should have been caught at compile time, so
    * skip checking that here. */
-  SV * const tmpsv = PAD_SV(ofs);
-  lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
+  {
+    SV * const tmpsv = PAD_SV(ofs);
+    lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
+  }
 
   return 1;
 }
@@ -48,8 +50,10 @@ S_plu_perl_lexical_to_number(lua_State *L)
 
   /* NOT_IN_PAD should have been caught at compile time, so
    * skip checking that here. */
-  SV * const tmpsv = PAD_SV(ofs);
-  lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
+  {
+    SV * const tmpsv = PAD_SV(ofs);
+    lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
+  }
 
   return 1;
 }
