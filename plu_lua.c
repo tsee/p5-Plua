@@ -15,7 +15,7 @@
 
 /* Convert lexical Perl SV to lua_Integer on Lua stack */
 static int
-plu_perl_lexical_to_integer(lua_State *L)
+S_plu_perl_lexical_to_integer(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
@@ -36,7 +36,7 @@ plu_perl_lexical_to_integer(lua_State *L)
 
 /* Convert lexical Perl SV to lua_Number on Lua stack */
 static int
-plu_perl_lexical_to_number(lua_State *L)
+S_plu_perl_lexical_to_number(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
@@ -57,7 +57,7 @@ plu_perl_lexical_to_number(lua_State *L)
 
 /* Convert lexical Perl SV to lua_Number on Lua stack */
 static int
-plu_perl_lexical_to_string(lua_State *L)
+S_plu_perl_lexical_to_string(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
@@ -82,7 +82,7 @@ plu_perl_lexical_to_string(lua_State *L)
 
 
 static int
-plu_lua_to_perl_lexical(lua_State *L)
+S_plu_lua_to_perl_lexical(lua_State *L)
 {
   PADOFFSET ofs;
   int ltype;
@@ -147,22 +147,22 @@ plu_new_lua_state(pTHX)
   /* Install our Perl-interfacing functions */
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, plu_perl_lexical_to_integer, PLU_N_THX_ARGS);
+  lua_pushcclosure(L, S_plu_perl_lexical_to_integer, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_int");
 
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, plu_perl_lexical_to_number, PLU_N_THX_ARGS);
+  lua_pushcclosure(L, S_plu_perl_lexical_to_number, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_num");
 
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, plu_perl_lexical_to_string, PLU_N_THX_ARGS);
+  lua_pushcclosure(L, S_plu_perl_lexical_to_string, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_str");
 
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, plu_lua_to_perl_lexical, PLU_N_THX_ARGS);
+  lua_pushcclosure(L, S_plu_lua_to_perl_lexical, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "lua_val_to_sv");
 
   return L;
