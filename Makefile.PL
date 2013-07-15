@@ -43,7 +43,7 @@ WriteMakefile(
   clean => { FILES => 'PLua-*' },
   DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
   LIBS              => ['-lluajit-5.1'], # e.g., '-lm'
-  INC               => '-I.',
+  INC               => '-I/usr/include/luajit-2.0/ -I.',
   #LIBS              => ['-L/home/tsee/perl/luajit-install/lib -lluajit-5.1'], # e.g., '-lm'
   #INC               => '-I/home/tsee/perl/luajit-install/include/luajit-2.0 -I.',
   OPTIMIZE          => $OPTIMIZE,
