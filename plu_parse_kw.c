@@ -78,9 +78,6 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   /* Get registry index for the just-compiled function */
   lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX);
   *op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);
-
-  /*test_padofs = pad_findmy("$foo", 4, 0);
-  ((plu_op_aux_t *)(*op_ptr)->op_targ)->test = test_padofs;*/
 }
  
 
