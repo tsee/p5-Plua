@@ -22,7 +22,7 @@ S_scan_lua_block_delim(pTHX_ const unsigned int ndelimchars, char **outstring, S
         ndelim++;
         if (ndelim == ndelimchars) {
           *outstring = PL_parser->bufptr;
-          *outstringlen = (STRLEN)(s - PL_parser->bufptr - ndelimchars);
+          *outstringlen = (STRLEN)(s - PL_parser->bufptr - ndelimchars + 1);
           lex_read_to(s+1); /* skip Perl's lexer/parser ahead to end of Lua block */
           return;
         }
@@ -53,15 +53,14 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   if (c != '{')
     croak("Can't parse Lua block after 'lua'");
 
-  /* FIXME do we need to back up one char at the end of this? */
+  /* peek first to be able to not eat the first non-delimiter character */
   while (1) {
-    c = lex_read_unichar(0);
+    c = lex_peek_unichar(0);
     if (c != '{')
       break;
+    (void)lex_read_unichar(0);
     ndelimchars++;
   }
-
-  lex_read_space(0);
 
   lex_read_space(0);
 
