@@ -20,4 +20,3 @@ TODO!
   (IOW lookup by name).
   => Update: Now using Lua references for this. Quite a bit cleaner, but no more
      efficient. Guess that'll be the best we can do for now.
-- rurban says: Compiling Lua functions to lexicals instead of globals saves a lookup!
