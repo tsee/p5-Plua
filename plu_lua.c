@@ -253,7 +253,7 @@ int
 plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len)
 {
   int status;
-  status = luaL_loadbuffer(PLU_lua_int, code, len, "_INLINED_LUA");
+  status = luaL_loadbuffer(PLU_lua_int, code, len, "inlined Lua block");
   switch (status) {
     case 0:
       break;
