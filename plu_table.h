@@ -13,9 +13,11 @@ typedef struct plu_table {
   int registry_index;
 } plu_table_t;
 
-/* create new table object from table on top of Lua stack */
+/* Create new table object from table on top of Lua stack */
 plu_table_t *plu_new_table_object(pTHX_ lua_State *ls);
 
+/* Same as plu_new_table_object, but then converts it to a
+ * blessed Perl SV (not mortalized) */
 SV *plu_new_table_object_perl(pTHX_ lua_State *ls);
 
 #define PLU_TABLE_PUSH_TO_STACK(tbl) \
