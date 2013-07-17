@@ -1,6 +1,10 @@
 TYPEMAP
 plu_table_t *	O_OBJECT
 
+OUTPUT
+O_OBJECT
+  sv_setref_pv( $arg, CLASS, (void*)$var );
+
 INPUT
 O_OBJECT
   if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )

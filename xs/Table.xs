@@ -1,6 +1,12 @@
 MODULE = PLua PACKAGE = PLua::Table
 PROTOTYPES: DISABLE
 
+plu_table_t *
+plu_table_t::new()
+  CODE:
+    RETVAL = plu_new_table_object_perl(aTHX_ PLU_lua_int);
+  OUTPUT: RETVAL
+
 void
 plu_table_t::DESTROY()
   CODE:
