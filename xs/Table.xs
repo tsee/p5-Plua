@@ -15,9 +15,15 @@ plu_table_t::get(key)
     char *str;
     int dopop;
   CODE:
-    str = SvPV(key, len);
-    PLU_TABLE_PUSH_TO_STACK(*THIS);
-    lua_pushlstring(THIS->L, str, (size_t)len);
+    if (SvFLAGS(key) & (SVf_IOK|SVf_NOK)) {
+      PLU_TABLE_PUSH_TO_STACK(*THIS);
+      lua_pushnumber(THIS->L, SvNV(key));
+    }
+    else {
+      PLU_TABLE_PUSH_TO_STACK(*THIS);
+      str = SvPV(key, len);
+      lua_pushlstring(THIS->L, str, (size_t)len);
+    }
     lua_gettable(THIS->L, -2);
     RETVAL = plu_luaval_to_perl(aTHX_ THIS->L, -1, &dopop);
     lua_pop(THIS->L, 2 + dopop);
