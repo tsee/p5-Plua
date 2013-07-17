@@ -7,6 +7,8 @@
 #include <perl.h>
 
 #include <lua.h>
+#include "plu_table.h"
+#include "plu_lua_inline.h"
 
 /* Create new Lua interpreter and initialize it */
 lua_State *plu_new_lua_state(pTHX);
@@ -22,5 +24,8 @@ int plu_call_lua_func_via_registry(pTHX_ const int registry_idx);
 
 /* Call this after plu_call_lua_func returns != 0 */
 SV *plu_get_lua_errmsg(pTHX);
+
+/* Implemented in plu_lua_inline.h */
+/*PLU_STATIC_INLINE SV *plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)*/
 
 #endif

@@ -13,14 +13,14 @@ plu_table_t::get(key)
   PREINIT:
     STRLEN len;
     char *str;
+    int dopop;
   CODE:
     str = SvPV(key, len);
     PLU_TABLE_PUSH_TO_STACK(*THIS);
     lua_pushlstring(THIS->L, str, (size_t)len);
     lua_gettable(THIS->L, -2);
-    /* TODO: THIS NEEDS TO USE A TENTATIVE FUNCTION TO DETERMINE TARGET TYPE, see also Inline::Lua */
-    RETVAL = newSViv((IV)lua_tointeger(THIS->L, -1));
-    lua_pop(THIS->L, 2);
+    RETVAL = plu_luaval_to_perl(aTHX_ THIS->L, -1, &dopop);
+    lua_pop(THIS->L, 2 + dopop);
   OUTPUT: RETVAL
 
 SV *

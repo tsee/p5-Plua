@@ -11,6 +11,7 @@
 #include "plu_inline.h"
 #include "plu_global_state.h"
 #include "plu_table.h"
+#include "plu_lua.h"
 
 MODULE = PLua PACKAGE = PLua
 PROTOTYPES: DISABLE
