@@ -1,5 +1,5 @@
-#ifndef PLU_LUE_H_
-#define PLU_LUE_H_
+#ifndef PLU_LUA_H_
+#define PLU_LUA_H_
 
 /* Code related to interacting with Lua */
 
