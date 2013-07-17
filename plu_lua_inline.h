@@ -34,7 +34,7 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
         lua_pop(L, 1);
       }
       else {
-        plu_new_table_object_perl(aTHX_ L);
+        sv = plu_new_table_object_perl(aTHX_ L);
       }
       return sv;
     }
