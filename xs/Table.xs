@@ -35,6 +35,42 @@ plu_table_t::get(key)
     lua_pop(THIS->L, 2 + dopop);
   OUTPUT: RETVAL
 
+void
+plu_table_t::set_int(key, value)
+    SV *key;
+    SV *value;
+  ALIAS:
+    set_num = 1
+    set_str = 2
+  PREINIT:
+    STRLEN len;
+    char *str;
+    int dopop;
+  CODE:
+    if (SvFLAGS(key) & (SVf_IOK|SVf_NOK)) {
+      PLU_TABLE_PUSH_TO_STACK(*THIS);
+      lua_pushnumber(THIS->L, SvNV(key));
+    }
+    else {
+      PLU_TABLE_PUSH_TO_STACK(*THIS);
+      str = SvPV(key, len);
+      lua_pushlstring(THIS->L, str, (size_t)len);
+    }
+    switch (ix) {
+    case 0:
+      lua_pushinteger(THIS->L, SvIV(value));
+      break;
+    case 1:
+      lua_pushnumber(THIS->L, SvNV(value));
+      break;
+    case 2:
+      str = SvPV(value, len);
+      lua_pushlstring(THIS->L, str, (size_t)len);
+      break;
+    }
+    lua_settable(THIS->L, -3);
+    lua_pop(THIS->L, 1);
+
 SV *
 _make_table()
   CODE:
