@@ -28,14 +28,7 @@
     stackassertline = __LINE__; \
   } STMT_END
 #  define PLU_LEAVE_STACKASSERT(L) \
-  STMT_START { \
-    if (lua_gettop((L)) != stackassertelems) { \
-      croak("Lua stack is unbalanced. " \
-            "At start: %i elements (at %s:%i). Now: %i elements " \
-            "(at %s:%i)", stackassertelems, stackassertfile, stackassertline, \
-            lua_gettop((L)), __FILE__, __LINE__); \
-    } \
-  } STMT_END
+    PLU_LEAVE_STACKASSERT_MODIFIED(L, 0)
 #  define PLU_LEAVE_STACKASSERT_MODIFIED(L, change) \
   STMT_START { \
     if (lua_gettop((L)) != stackassertelems + (change)) { \
