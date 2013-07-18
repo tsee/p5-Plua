@@ -169,19 +169,23 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   switch (ltype) {
   case LUA_TNUMBER:
     sv_setnv_mg(sv, lua_tonumber(L, -1));
+    lua_pop(L, 1);
     break;
   case LUA_TBOOLEAN:
     sv_setiv_mg(sv, lua_toboolean(L, -1));
+    lua_pop(L, 1);
     break;
   case LUA_TSTRING:
     {
       size_t len;
       const char *str = lua_tolstring(L, -1, &len);
       sv_setpvn_mg(sv, str, (STRLEN)len);
+      lua_pop(L, 1);
       break;
     }
   case LUA_TNIL:
-    sv_setsv(sv, &PL_sv_undef);
+    sv_setsv_mg(sv, &PL_sv_undef);
+    lua_pop(L, 1);
     break;
   case LUA_TTABLE:
     SvREFCNT_dec(sv);
