@@ -276,3 +276,58 @@ plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len)
   return status;
 }
 
+/* Inline::Lua inspired! Push a Perl hash onto the Lua stack */
+/*
+void
+plu_push_hash(pTHX_ lua_State *L, HV *hv)
+{
+  HE* he;
+  I32 len;
+  char *key;
+
+  lua_newtable(L);
+  hv_iterinit(hv);
+
+  while ((he = hv_iternext(hv))) {
+    key = hv_iterkey(he, &len);
+    lua_pushlstring(L, key, len);
+    push_val(L, hv_iterval(hv, he));
+    lua_settable(L, -3);
+  }
+}
+*/
+
+
+/* Inline::Lua inspired! Push a Perl array onto the Lua stack */
+/*
+void
+plu_push_ary(pTHX_ lua_State *L, AV *av)
+{
+  lua_newtable(L);
+  size_t i, n;
+  n = (size_t)av_len(av)+1;
+
+  for (i = 0; i < n; i++) {
+    SV **ptr = av_fetch(av, (IV)i, FALSE);
+    lua_pushnumber(L, (lua_Number)i+1);
+    if (LIKELY( ptr ))
+      push_val(L, *ptr);
+    else
+      lua_pushnil(L);
+    lua_settable(L, -3);
+  }
+}
+*/
+
+int
+plu_push_table_obj(pTHX_ SV *sv)
+{
+  if (UNLIKELY( !sv_isobject(sv) || !sv_derived_from(sv, "PLua::Table") ))
+  {
+    return 1;
+  }
+  plu_table_t *tbl = (plu_table_t *)SvIV((SV*)SvRV(sv));
+  PLU_TABLE_PUSH_TO_STACK(*tbl);
+  return 0;
+}
+

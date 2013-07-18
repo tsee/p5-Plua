@@ -28,4 +28,14 @@ SV *plu_get_lua_errmsg(pTHX);
 /* Implemented in plu_lua_inline.h */
 /*PLU_STATIC_INLINE SV *plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)*/
 
+/* Push a Perl hash onto the Lua stack */
+void plu_push_hash(pTHX_ lua_State *L, HV *hv);
+
+/* Push a Perl array onto the Lua stack */
+void plu_push_ary(pTHX_ lua_State *L, AV *av);
+
+/* Push the table of an XS PLua::Table object to the Lua stack. Uses the Lua state that
+ * the actual table lives in. */
+int plu_push_table_obj(pTHX_ SV *sv);
+
 #endif
