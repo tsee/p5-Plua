@@ -166,7 +166,8 @@ S_plu_lua_to_perl_lexical(lua_State *L)
     sv_setsv(sv, &PL_sv_undef);
     break;
   case LUA_TTABLE:
-    sv_setsv(sv, plu_new_table_object_perl(aTHX_ L));
+    SvREFCNT_dec(sv);
+    PAD_SVl(ofs) = plu_new_table_object_perl(aTHX_ L);
     break;
   case LUA_TFUNCTION:
   case LUA_TUSERDATA:
