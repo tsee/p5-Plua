@@ -58,6 +58,7 @@ plu_table_t::set_int(key, value)
   ALIAS:
     set_num = 1
     set_str = 2
+    set_table = 3
   PREINIT:
     STRLEN len;
     char *str;
@@ -84,6 +85,12 @@ plu_table_t::set_int(key, value)
     case 2:
       str = SvPV(value, len);
       lua_pushlstring(THIS->L, str, (size_t)len);
+      break;
+    case 3:
+      if (UNLIKELY( plu_push_table_obj(aTHX_ value) != 0 )) {
+        lua_pop(THIS->L, 2); /* table and key */
+        croak("Failed to convert Perl value to Lua table. Unsupported type?");
+      }
       break;
     }
     lua_settable(THIS->L, -3);
