@@ -23,7 +23,10 @@ plu_table_t::get(key)
     STRLEN len;
     char *str;
     int dopop;
+    PLU_dSTACKASSERT;
   CODE:
+    PLU_ENTER_STACKASSERT(PLU_lua_int);
+    /* FIXME things other than numbers and strings as keys */
     if (SvFLAGS(key) & (SVf_IOK|SVf_NOK)) {
       PLU_TABLE_PUSH_TO_STACK(*THIS);
       lua_pushnumber(THIS->L, SvNV(key));
@@ -35,7 +38,8 @@ plu_table_t::get(key)
     }
     lua_gettable(THIS->L, -2);
     RETVAL = plu_luaval_to_perl(aTHX_ THIS->L, -1, &dopop);
-    lua_pop(THIS->L, 2 + dopop);
+    lua_pop(THIS->L, dopop+1);
+    PLU_LEAVE_STACKASSERT(PLU_lua_int);
   OUTPUT: RETVAL
 
 
