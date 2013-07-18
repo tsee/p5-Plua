@@ -19,7 +19,9 @@ S_plu_perl_lexical_to_integer(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
+  PLU_dSTACKASSERT;
 
+  PLU_ENTER_STACKASSERT(L);
   PLU_GET_THX(L);
 
   /* FIXME check that it's an integer? */
@@ -32,6 +34,8 @@ S_plu_perl_lexical_to_integer(lua_State *L)
     lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
   }
 
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
+
   return 1;
 }
 
@@ -42,6 +46,9 @@ S_plu_perl_lexical_to_number(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
 
   PLU_GET_THX(L);
 
@@ -55,6 +62,7 @@ S_plu_perl_lexical_to_number(lua_State *L)
     lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
   }
 
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
   return 1;
 }
 
@@ -65,6 +73,9 @@ S_plu_perl_lexical_to_string(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
 
   PLU_GET_THX(L);
 
@@ -81,6 +92,7 @@ S_plu_perl_lexical_to_string(lua_State *L)
     lua_pushlstring(L, str, (size_t)len);
   }
 
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
   return 1;
 }
 
@@ -94,6 +106,9 @@ S_plu_perl_lexical_array_to_integer_table(lua_State *L)
 {
   PADOFFSET ofs;
   PLU_dTHX;
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
 
   PLU_GET_THX(L);
 
@@ -127,6 +142,7 @@ S_plu_perl_lexical_array_to_integer_table(lua_State *L)
     }
   }
 
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
   return 1;
 }
 
@@ -138,9 +154,11 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   int ltype;
   PLU_dTHX;
   SV *sv;
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
 
   PLU_GET_THX(L);
-
   /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -2);
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -175,11 +193,13 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   case LUA_TLIGHTUSERDATA:
   case LUA_TNONE:
   default:
+    /* FIXME balance stack! */
     luaL_error(L, "Lua variables of type '%s' currently "
                   "cannot be converted to Perl scalars", lua_typename(L, ltype));
     break;
   }
 
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, -1);
   return 0;
 }
 
