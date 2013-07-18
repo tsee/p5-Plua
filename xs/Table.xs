@@ -104,6 +104,13 @@ plu_table_t::set_int(key, value)
     PLU_LEAVE_STACKASSERT(L);
 
 
+HV *
+plu_table_t::to_hash(int recursive = 0)
+  CODE:
+    RETVAL = plu_table_obj_to_hash(aTHX_ THIS, recursive);
+  OUTPUT: RETVAL
+
+
 SV *
 _make_table()
   PREINIT:
