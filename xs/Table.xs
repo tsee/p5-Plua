@@ -3,17 +3,25 @@ PROTOTYPES: DISABLE
 
 plu_table_t *
 plu_table_t::new()
+  PREINIT:
+    PLU_dSTACKASSERT;
   CODE:
+    PLU_ENTER_STACKASSERT(PLU_lua_int);
     lua_createtable(PLU_lua_int, 0, 0);
     RETVAL = plu_new_table_object(aTHX_ PLU_lua_int);
+    PLU_LEAVE_STACKASSERT(PLU_lua_int);
   OUTPUT: RETVAL
 
 
 void
 plu_table_t::DESTROY()
+  PREINIT:
+    PLU_dSTACKASSERT;
   CODE:
+    PLU_ENTER_STACKASSERT(PLU_lua_int);
     luaL_unref(THIS->L, LUA_REGISTRYINDEX, THIS->registry_index); 
     Safefree(THIS);
+    PLU_LEAVE_STACKASSERT(PLU_lua_int);
 
 
 SV *
@@ -53,7 +61,9 @@ plu_table_t::set_int(key, value)
   PREINIT:
     STRLEN len;
     char *str;
+    PLU_dSTACKASSERT;
   CODE:
+    PLU_ENTER_STACKASSERT(PLU_lua_int);
     /* FIXME this isn't exception-clean */
     if (SvFLAGS(key) & (SVf_IOK|SVf_NOK)) {
       PLU_TABLE_PUSH_TO_STACK(*THIS);
@@ -78,13 +88,18 @@ plu_table_t::set_int(key, value)
     }
     lua_settable(THIS->L, -3);
     lua_pop(THIS->L, 1);
+    PLU_LEAVE_STACKASSERT(PLU_lua_int);
 
 SV *
 _make_table()
+  PREINIT:
+    PLU_dSTACKASSERT;
   CODE:
     /* JUST FOR TESTING */
+    PLU_ENTER_STACKASSERT(PLU_lua_int);
     lua_newtable(PLU_lua_int);
     lua_pushinteger(PLU_lua_int, 42);
     lua_setfield(PLU_lua_int, -2, "foo");
     RETVAL = plu_new_table_object_perl(aTHX_ PLU_lua_int);
+    PLU_LEAVE_STACKASSERT(PLU_lua_int);
   OUTPUT: RETVAL
