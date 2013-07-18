@@ -28,10 +28,10 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
   case LUA_TTABLE:
     {
       SV *sv;
+      *dopop = 0;
       if (UNLIKELY( idx != -1 )) {
         lua_pushvalue(L, idx);
         sv = plu_new_table_object_perl(aTHX_ L);
-        lua_pop(L, 1);
       }
       else {
         sv = plu_new_table_object_perl(aTHX_ L);
