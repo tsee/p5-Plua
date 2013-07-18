@@ -11,6 +11,7 @@
 #  define PLU_dSTACKASSERT (void)
 #  define PLU_ENTER_STACKASSERT(L) (void)
 #  define PLU_LEAVE_STACKASSERT(L) (void)
+#  define PLU_LEAVE_STACKASSERT_MODIFIED(L, change) (void)
 #else
 #  define PLU_DEBUGGING 1
 #  define PLU_DEBUG(s) printf(s)
@@ -29,6 +30,15 @@
 #  define PLU_LEAVE_STACKASSERT(L) \
   STMT_START { \
     if (lua_gettop((L)) != stackassertelems) { \
+      croak("Lua stack is unbalanced. " \
+            "At start: %i elements (at %s:%i). Now: %i elements " \
+            "(at %s:%i)", stackassertelems, stackassertfile, stackassertline, \
+            lua_gettop((L)), __FILE__, __LINE__); \
+    } \
+  } STMT_END
+#  define PLU_LEAVE_STACKASSERT_MODIFIED(L, change) \
+  STMT_START { \
+    if (lua_gettop((L)) != stackassertelems + (change)) { \
       croak("Lua stack is unbalanced. " \
             "At start: %i elements (at %s:%i). Now: %i elements " \
             "(at %s:%i)", stackassertelems, stackassertfile, stackassertline, \
