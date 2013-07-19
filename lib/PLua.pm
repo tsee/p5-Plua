@@ -9,8 +9,17 @@ our $VERSION = '0.01';
 
 SCOPE: {
   my $ident = qr/[a-zA-Z0-9_]+/;
-  my $get_methods = qr/int|num|str/;
+  my $get_methods = qr/int|num|str|table|any/;
   my $set_methods = qr/set\s*\(\s*($ident)\s*\)/;
+
+  # Lookup for Lua function name to call for the given Perl => Lua conversion type
+  my %get_meth_to_funcname = (
+    'int'   => 'var_to_int',
+    'num'   => 'var_to_num',
+    'str'   => 'var_to_str',
+    'table' => 'var_to_table',
+    'any'   => 'var_to_luaval',
+  );
 
   sub _scan_lua_code {
     # Lua code may be modified in-place in $_[0]
@@ -32,7 +41,7 @@ SCOPE: {
     $_[0] =~ s/(\$$ident)\s*\.\s*($get_methods)\b/
         not(defined($lexicals->{$1}))
           ? croak("Could not find Perl lexical with name '$1' referenced from Lua block")
-          : "perl.var_to_$2(" . $lexicals->{$1} . ")"
+          : "perl.$get_meth_to_funcname{$2}(" . $lexicals->{$1} . ")"
       /goe;
 
     $_[0] =~ s/(\$$ident)\s*=\s*([^\n]+)/

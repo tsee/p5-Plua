@@ -96,6 +96,88 @@ S_plu_perl_lexical_to_string(lua_State *L)
   return 1;
 }
 
+/* Convert lexical Perl SV to a Lua table on Lua stack */
+static int
+S_plu_perl_lexical_to_table(lua_State *L)
+{
+  PADOFFSET ofs;
+  PLU_dTHX;
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
+  PLU_GET_THX(L);
+
+  /* FIXME check that it's an integer? */
+  ofs = (PADOFFSET)lua_tointeger(L, -1);
+
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+  {
+    SV * const tmpsv = PAD_SV(ofs);
+    if (SvROK(tmpsv) && sv_derived_from(tmpsv, "PLua::Table")) {
+      plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(tmpsv));
+      PLU_TABLE_PUSH_TO_STACK(*tbl);
+    }
+    else {
+      croak("Unsupported Perl type found '%s' "
+            " while converting to Lua value", SvPV_nolen(tmpsv));
+    }
+  }
+
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
+
+  return 1;
+}
+
+/* Convert lexical Perl SV to SOME Lua value on Lua stack */
+static int
+S_plu_perl_lexical_to_luaval(lua_State *L)
+{
+  PADOFFSET ofs;
+  PLU_dTHX;
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
+  PLU_GET_THX(L);
+
+  /* FIXME check that it's an integer? */
+  ofs = (PADOFFSET)lua_tointeger(L, -1);
+
+  /* NOT_IN_PAD should have been caught at compile time, so
+   * skip checking that here. */
+  {
+    SV * const tmpsv = PAD_SV(ofs);
+    if (SvROK(tmpsv)) {
+      if (sv_derived_from(tmpsv, "PLua::Table")) {
+        plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(tmpsv));
+        PLU_TABLE_PUSH_TO_STACK(*tbl);
+      }
+      else {
+        croak("Unsupported Perl type/reference found '%s' "
+              " while converting to Lua value", SvPV_nolen(tmpsv));
+      }
+    }
+    else if (SvNOK(tmpsv))
+      lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
+    else if (SvIOK(tmpsv))
+      lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
+    else if (SvPOK(tmpsv)) {
+      STRLEN len;
+      char *str;
+      str = SvPV(tmpsv, len);
+      lua_pushlstring(L, str, (size_t)len);
+    }
+    else {
+      croak("Unsupported Perl type found '%s' "
+            " while converting to Lua value", SvPV_nolen(tmpsv));
+    }
+  }
+
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
+
+  return 1;
+}
+
 
 static int
 S_plu_lua_to_perl_lexical(lua_State *L)
@@ -186,6 +268,16 @@ plu_new_lua_state(pTHX)
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, S_plu_perl_lexical_to_string, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_str");
+
+  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(L);
+  lua_pushcclosure(L, S_plu_perl_lexical_to_table, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "var_to_table");
+
+  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+  PLU_PUSH_THX(L);
+  lua_pushcclosure(L, S_plu_perl_lexical_to_luaval, PLU_N_THX_ARGS);
+  lua_setfield(L, -2, "var_to_luaval");
 
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
