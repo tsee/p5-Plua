@@ -84,6 +84,14 @@ PLua - Perl and Lua Make a Great Couple!
   #         'foo' => "bar",
   #       };
   
+  # Similarly for arrays (but Lua arrays start at index 1 by default):
+  my $array = $luatable->get("inner")->to_array();
+  # $array = [undef, 5, 8];
+  
+  # But often, you want this:
+  $array = $luatable->get("inner")->to_array_shifted();
+  # $array = [5, 8];
+
 =head1 DESCRIPTION
 
 This Perl module aims at providing seamless integration between Perl and Lua
