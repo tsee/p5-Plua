@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 
-plan tests => 14;
+plan tests => 15;
 
 # Test Plua::Table API
 
@@ -45,6 +45,21 @@ undef $tbl; # clean up manually to trigger potential issues before "Alive" below
 # Test with parent table gone
 is($tbl2->get(1), 5, "Inner table access after parent is gone");
 undef $tbl2; # clean up manually to trigger potential issues before "Alive" below
+
+
+# Test the other direction: Perl's XS Lua table to Lua
+SCOPE: {
+  my $table = PLua::Table->new;
+  my $table2;
+  $table->set_int("foo", 42);
+  lua {{
+    local tbl = $table.table
+    local tbl2 = {}
+    tbl2.bar = tbl.foo + 1
+    $table2 = tbl2
+  }}
+  is_deeply($table2->to_hash, {bar => 43}, "Table roundtrip");
+}
 
 pass("Alive");
 
