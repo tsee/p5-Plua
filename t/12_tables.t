@@ -67,7 +67,7 @@ SCOPE: {
   $table->set_int("foo", 42);
   my $bar;
   lua {
-    $bar = $table.table.foo
+    $bar = $table.any.foo
   }
   is($bar, 42, "Nasty chaining");
 }
