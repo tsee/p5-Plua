@@ -111,6 +111,25 @@ plu_table_t::to_hash(int recursive = 0)
   OUTPUT: RETVAL
 
 
+AV *
+plu_table_t::to_array(int recursive = 0)
+  CODE:
+    RETVAL = plu_table_obj_to_array(aTHX_ THIS, recursive);
+  OUTPUT: RETVAL
+
+AV *
+plu_table_t::to_array_shifted(int recursive = 0)
+  CODE:
+    RETVAL = plu_table_obj_to_array(aTHX_ THIS, recursive);
+    {
+      SV *tmp = av_shift(RETVAL);
+      if (UNLIKELY( SvOK(tmp) ))
+        SvREFCNT_dec(tmp);
+    }
+  OUTPUT: RETVAL
+
+
+
 SV *
 _make_table()
   PREINIT:

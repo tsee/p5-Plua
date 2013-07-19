@@ -23,6 +23,9 @@ SV *plu_new_table_object_perl(pTHX_ lua_State *ls);
 /* Convert the guts of an XS wrapper of a Lua table to a (mortal) Perl HV */
 HV *plu_table_obj_to_hash(pTHX_ plu_table_t *THIS, int recursive);
 
+/* Convert the guts of an XS wrapper of a Lua table to a (mortal) Perl AV */
+AV *plu_table_obj_to_array(pTHX_ plu_table_t *THIS, int recursive);
+
 #define PLU_TABLE_PUSH_TO_STACK(tbl) \
     lua_rawgeti((tbl).L, LUA_REGISTRYINDEX, (tbl).registry_index)
 

@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 
-plan tests => 10;
+plan tests => 14;
 
 # Test Plua::Table API
 
@@ -12,7 +12,7 @@ my $tbl;
 my $tbl2;
 
 lua {{
-  local table = { key = 5, foo = 12, tbl = {5, 8} }
+  local table = { key = 5, foo = 12, tbl = {5, 8}, nasty = {[0] = 2, [1] = 3} }
   $tbl = table
 }}
 
@@ -29,7 +29,17 @@ my $hash = $tbl2->to_hash;
 is_deeply($hash, {1 => 5, 2 => 8}, "Inner hash converted ok");
 
 $hash = $tbl->to_hash(1);
-is_deeply($hash, {key => 5, foo => 13, tbl => {1 => 5, 2 => 8}}, "Outer hash converted ok");
+is_deeply($hash, {key => 5, foo => 13, tbl => {1 => 5, 2 => 8}, nasty => {0 => 2, 1 => 3}}, "Outer hash converted ok");
+
+my $ary = $tbl2->to_array;
+is_deeply($ary, [undef, 5, 8], "Unshifted array");
+$ary = $tbl2->to_array_shifted;
+is_deeply($ary, [5, 8], "Shifted array");
+
+$ary = $tbl->get("nasty")->to_array;
+is_deeply($ary, [2, 3], "Unshifted funny array");
+$ary = $tbl->get("nasty")->to_array_shifted;
+is_deeply($ary, [3], "Unshifted funny array");
 
 undef $tbl; # clean up manually to trigger potential issues before "Alive" below
 # Test with parent table gone
