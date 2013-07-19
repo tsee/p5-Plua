@@ -75,6 +75,7 @@ PLua - Perl and Lua Make a Great Couple!
   }
   say $foo; # prints 13.3
 
+  # You can convert Lua tables to Perl!
   my $luatable;
   lua {{
     local mytbl = { foo = "bar", inner = {5, 8} }
@@ -100,6 +101,13 @@ PLua - Perl and Lua Make a Great Couple!
   # But often, you want this:
   $array = $luatable->get("inner")->to_array_shifted();
   # $array = [5, 8];
+
+  # You can create Lua tables from Perl explicitly!
+  my $tbl = PLua::Table->new;
+  $tbl->set_string("foo" => "bar");
+  lua {
+    print($tbl.table.foo)
+  }
 
 =head1 DESCRIPTION
 
