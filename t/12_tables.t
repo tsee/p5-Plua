@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 
-plan tests => 15;
+plan tests => 16;
 
 # Test Plua::Table API
 
@@ -59,6 +59,17 @@ SCOPE: {
     $table2 = tbl2
   }}
   is_deeply($table2->to_hash, {bar => 43}, "Table roundtrip");
+}
+
+SCOPE: {
+  # direct chaining ought to work!
+  my $table = PLua::Table->new;
+  $table->set_int("foo", 42);
+  my $bar;
+  lua {
+    $bar = $table.table.foo
+  }
+  is($bar, 42, "Nasty chaining");
 }
 
 pass("Alive");
