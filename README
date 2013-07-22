@@ -57,4 +57,77 @@ Which is still fast enough with this code base. Patches welcome (really).
 
 =head1 Understanding the Implementation
 
-Who does?
+You'll need at least some basic knowledge of the Perl API in order to make
+sense of this, I suppose.
+
+PLua uses Perl's keyword plugin mechanism to generate a custom OP (OPs
+being the basic building block of Perl's ugly step-sister of an excuse
+for an AST).
+  
+=head2 What happens when you load "Plua"?
+
+=over 2
+
+=item *
+
+We use an XS C<BOOT> (see L<perlxs>) section to call the bootstrapping function
+C<plu_init_global_state> (see F<plu_global_state.h> and F<plu_global_state.c>).
+This in turn will perform the following steps:
+
+=item *
+
+Create a global (I know...) C<lua_State> object / Lua runtime for use by 
+PLua. This lives in C<PLU_lua_int> right now. Will eventually move
+elsewhere. (threads, reuse, coroutines, etc.)
+
+=item *
+
+Create and register the description of our custom Lua OP (C<PLU_xop>).
+Also register a hook for freeing OPs of our custom type since they
+have additional data attached to each instance.
+
+=iteam *
+
+Register our keyword plugin (see function C<plu_my_keyword_plugin>
+in F<plu_parse_kw.h>).
+
+=item *
+
+Register global destruction cleanup hook (Perl_call_atexit calling
+C<plu_global_state_final_cleanup>) for the Lua interpreter and
+other global state.
+
+=back
+
+=head2 What happens at compile time when you do "lua {...}"?
+
+=over 2
+
+=item *
+
+Perl's tokenizer finds the unknown "lua" keyword. It invokes the keyword
+plugin mechanism which eventually finds our particular keyword plugin
+(see above) and calls it. We detect that it's "our" keyword and...
+
+=item *
+
+I<HACK ALERT!> This must change in they future.
+
+... use the Perl lexer API to determine the Lua delimiter (one or many C<{>)
+and then use said API to find the corresponding number of successive (without
+whitespace) closing braces to end the Lua block.
+This should be replaced by a proper (extended) Lua parser later.
+
+=item *
+
+I<MORE HACKS!>
+
+The scanner code is modified by C<plu_munge_lua_code> in F<plu_lua_syntax_ext.c>.
+This is currently deals with syntax like "$x.int" or "$x = ...". It works
+by scanning the code with regexes
+
+FIXME
+
+=back
+
+
