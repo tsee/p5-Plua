@@ -1,22 +1,53 @@
-TODO!
+Things that need attention, categorized by estimated complexity.
+That might not match reality, though:
 
-- Move much or all of global state to per-Perl-interpreter storage.
-- Concurrent Lua execution with multiple Lua interpreters?
-- ithread-safety?
+Relatively Easy:
+- More documentation!
+- More tests!
+- Improved build system.
+- Internals documentation to lower barrier to entry.
+- lua_State Perl abstraction (wrapper written in XS) with some of the
+  main bits of interface wrapped for Perl.
+- Other Lua/Perl individual type conversions
+- Expose Lua functions to Perl
+  => Be inspired by the type conversion code that already exists + Inline::Lua
+- Expose Perl functions to Lua
+  => In both cases, what's the syntax to mark a function as exported? Or
+      should they all have transparent access to everything? That's overdoing
+      it, isn't it?
+
+Medium:
 - Type conversion between Perl and Lua - Tables are hashes AND arrays. The fun!
-- Get/set syntax for Perl lexicals in Lua?
+  => Basic type conversion is mostly done: Design principle is that
+     the receiving language will specify the conversion/marshalling behaviour
+     to avoid confusion. Too much automation / cleverness here is likely to
+     be counterproductive as Perl SVs are intrinsically ambiguous and Lua tables
+     are Perl arrays + Perl hashes + then some.
+
+Harder:
+- Move much or all of global state to per-Perl-interpreter storage.
+  => Without performance regression! (this makes it harder)
+  => ithread-safety?
+- Concurrent Lua execution with multiple Lua interpreters?
+  => Depends on having a lua_State abstraction exposed to Perl
+  => Depends on having lua_State global state moved to per-interpreter logic
+  => Likely quite hard to do sanely for the "PLua::Table" Lua table wrapper which is
+     tied to a lua_State.
+- Make Lua functions be Perl-level closures for Perl lexicals.
   => A way to efficiently stash the PAD offsets
   => This seems fine now for getting perl lexicals:
      $foo.int, $foo.num, $foo.str all get compiled to a Lua C
      function call that uses the PAD offset (determined at compile
      time) to fetch the Perl lexical value.
   => Setting Perl lexicals: Currently grabs expression to end of line. Good enough?
-- The reverse?
+- Access to Perl globals where there's no lexicals (and adherence to use strict?)
+- Design: Straight Perl array/hash accesses from Lua?
 - Improved scanning/lexing for finding the end of the Lua blocks.
-- Wrapping Lua functions for Perl
-- Wrapping Perl functions for Lua
-- Find a way to avoid having to create full-blown Lua functions out of snippets
-  and correspondingly find a more efficient way of executing them than lua_getglobal
-  (IOW lookup by name).
-  => Update: Now using Lua references for this. Quite a bit cleaner, but no more
-     efficient. Guess that'll be the best we can do for now.
+  => Requires a proper Lua parser. At least there's a BNF grammar for it!
+- Is there a faster way of executing Lua snippets than using Lua refs to store the
+  compiled Lua functions? I doubt it. But if so, please share!
+- There needs to be a better way of implementing the syntax extensions to Lua
+  that implement the Perl-specific bits (right now: Perl lexical access) than
+  regexes. Maybe an extended Lua parser that does transformations and then
+  faithfully regenerates Lua code with the same line numbers?
+- Lua line numbers need to be file-level for better debuggability!
