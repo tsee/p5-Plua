@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 
 my $OPTIMIZE;
 if ($ENV{DEBUG}) {
-  $OPTIMIZE = '-DDEBUG -O0 -Wall -Wextra -Wno-unused-function';
+  $OPTIMIZE = '-DDEBUG -O0 -g -Wall -Wextra -Wno-unused-function';
 }
 else {
   $OPTIMIZE = '-DNDEBUG';
