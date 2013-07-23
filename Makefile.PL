@@ -11,6 +11,10 @@ else {
   $OPTIMIZE = '-DNDEBUG';
 }
 
+my $luajit_inst_dir = $ENV{LUAJIT_DIR};
+my $libdir = $luajit_inst_dir ? "-L$luajit_inst_dir/lib " : "";
+my $incdir = "-I" . ($luajit_inst_dir || '/usr') . "/include/luajit-2.0";
+
 WriteMakefile(
   NAME                => 'PLua',
   AUTHOR              => q{Steffen Mueller <smueller@cpan.org>},
@@ -42,10 +46,8 @@ WriteMakefile(
   dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
   clean => { FILES => 'PLua-*' },
   DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
-  LIBS              => ['-lluajit-5.1'], # e.g., '-lm'
-  INC               => '-I/usr/include/luajit-2.0/ -I.',
-  #LIBS              => ['-L/home/tsee/perl/luajit-install/lib -lluajit-5.1'], # e.g., '-lm'
-  #INC               => '-I/home/tsee/perl/luajit-install/include/luajit-2.0 -I.',
+  LIBS              => ["$libdir -lluajit-5.1"],
+  INC               => "$incdir -I.",
   OPTIMIZE          => $OPTIMIZE,
   OBJECT            => '$(O_FILES)',
 );
