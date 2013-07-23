@@ -27,7 +27,7 @@ Medium:
 Harder:
 - Move much or all of global state to per-Perl-interpreter storage.
   => Without performance regression! (this makes it harder)
-  => ithread-safety?
+  => partial ithread-safety? The lexical access by offset is totally not thread safe.
 - Concurrent Lua execution with multiple Lua interpreters?
   => Depends on having a lua_State abstraction exposed to Perl
   => Depends on having lua_State global state moved to per-interpreter logic
@@ -46,6 +46,10 @@ Harder:
 - Lua line numbers need to be file-level for better debuggability!
 
 HARD:
+- Make lexical Perl variable access thread-safe.
+  => Right now, the lexical offsets here are going to refer to the thread that compiled
+     the code, I believe, but they'll be shared by virtue of the OP tree being shared?
+  => Requires learning a lot about the PADLIST/ithread connection (for Steffen)
 - Make Lua functions be Perl-level closures for Perl lexicals.
   => A way to efficiently stash the PAD offsets
   => This seems fine now for getting perl lexicals:
@@ -58,4 +62,7 @@ HARD:
          * addition we capture ourselves unless it's an ANON/format */
         new_capturep = out_capture ? out_capture :
                        CvLATE(cv) ? NULL : &new_capture;
+  => Look for /* found in an outer CV. Add appropriate fake entry to this pad */ in pad.c
+     => Need to emulate much of the code following that.
+
 
