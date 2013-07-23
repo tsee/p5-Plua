@@ -9,7 +9,7 @@ unreasonably possible!
 
 Lua (and specifically luajit) is really rather efficient. And it's a
 safe language. A "scripting" language. And it's not too painful to
-deal with from C. The motiviation is to allow Perl to use
+deal with from C. The motivation is to allow Perl to use
 tightly-coupled blocks of embedded Lua code to speed up hot code paths.
 
 In other words, you can do this:
@@ -61,7 +61,7 @@ You'll need at least some basic knowledge of the Perl API in order to make
 sense of this, I suppose.
 
 PLua uses Perl's keyword plugin mechanism to generate a custom OP (OPs
-being the basic building block of Perl's ugly step-sister of an excuse
+being the basic building blocks of Perl's ugly step-sister of an excuse
 for an AST).
   
 =head2 What happens when you load "Plua"?
@@ -111,7 +111,7 @@ plugin mechanism which eventually finds our particular keyword plugin
 
 =item *
 
-I<HACK ALERT!> This must change in they future.
+I<HACK ALERT!> This must change in the future.
 
 ... use the Perl lexer API to determine the Lua delimiter (one or many C<{>)
 and then use said API to find the corresponding number of successive (without
