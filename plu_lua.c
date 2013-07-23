@@ -247,6 +247,11 @@ plu_new_lua_state(pTHX)
 
   L= luaL_newstate();
 
+  if (!L) {
+      PerlIO_printf(Perl_debug_log, "Couldn't allocate memory for lua\n");
+      return NULL;
+  }
+
   /* C equivalent of Lua 'perl = {}' */
   lua_newtable(L);
   lua_setfield(L, LUA_GLOBALSINDEX, "perl");
