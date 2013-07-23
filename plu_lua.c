@@ -17,22 +17,15 @@
 static int
 S_plu_perl_lexical_to_integer(lua_State *L)
 {
-  PADOFFSET ofs;
+  SV *padsv;
   PLU_dTHX;
   PLU_dSTACKASSERT;
 
   PLU_ENTER_STACKASSERT(L);
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
-  ofs = (PADOFFSET)lua_tointeger(L, -1);
-
-  /* NOT_IN_PAD should have been caught at compile time, so
-   * skip checking that here. */
-  {
-    SV * const tmpsv = PAD_SV(ofs);
-    lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
-  }
+  padsv = (SV *)lua_tointeger(L, -1);
+  lua_pushinteger(L, (lua_Integer)SvIV(padsv));
 
   PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
 
@@ -44,7 +37,7 @@ S_plu_perl_lexical_to_integer(lua_State *L)
 static int
 S_plu_perl_lexical_to_number(lua_State *L)
 {
-  PADOFFSET ofs;
+  SV *padsv;
   PLU_dTHX;
   PLU_dSTACKASSERT;
 
@@ -52,15 +45,8 @@ S_plu_perl_lexical_to_number(lua_State *L)
 
   PLU_GET_THX(L);
 
-  /* FIXME check that it's a integer? */
-  ofs = (PADOFFSET)lua_tointeger(L, -1);
-
-  /* NOT_IN_PAD should have been caught at compile time, so
-   * skip checking that here. */
-  {
-    SV * const tmpsv = PAD_SV(ofs);
-    lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
-  }
+  padsv = (SV *)lua_tointeger(L, -1);
+  lua_pushnumber(L, (lua_Number)SvNV(padsv));
 
   PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
   return 1;
@@ -71,7 +57,7 @@ S_plu_perl_lexical_to_number(lua_State *L)
 static int
 S_plu_perl_lexical_to_string(lua_State *L)
 {
-  PADOFFSET ofs;
+  SV *padsv;
   PLU_dTHX;
   PLU_dSTACKASSERT;
 
@@ -79,16 +65,12 @@ S_plu_perl_lexical_to_string(lua_State *L)
 
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
-  ofs = (PADOFFSET)lua_tointeger(L, -1);
+  padsv = (SV *)lua_tointeger(L, -1);
 
-  /* NOT_IN_PAD should have been caught at compile time, so
-   * skip checking that here. */
   {
     STRLEN len;
     char *str;
-    SV * const tmpsv = PAD_SV(ofs);
-    str = SvPV(tmpsv, len);
+    str = SvPV(padsv, len);
     lua_pushlstring(L, str, (size_t)len);
   }
 
@@ -100,7 +82,7 @@ S_plu_perl_lexical_to_string(lua_State *L)
 static int
 S_plu_perl_lexical_to_table(lua_State *L)
 {
-  PADOFFSET ofs;
+  SV *padsv;
   PLU_dTHX;
   PLU_dSTACKASSERT;
 
@@ -108,19 +90,18 @@ S_plu_perl_lexical_to_table(lua_State *L)
   PLU_GET_THX(L);
 
   /* FIXME check that it's an integer? */
-  ofs = (PADOFFSET)lua_tointeger(L, -1);
+  padsv = (SV *)lua_tointeger(L, -1);
 
   /* NOT_IN_PAD should have been caught at compile time, so
    * skip checking that here. */
   {
-    SV * const tmpsv = PAD_SV(ofs);
-    if (SvROK(tmpsv) && sv_derived_from(tmpsv, "PLua::Table")) {
-      plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(tmpsv));
+    if (SvROK(padsv) && sv_derived_from(padsv, "PLua::Table")) {
+      plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(padsv));
       PLU_TABLE_PUSH_TO_STACK(*tbl);
     }
     else {
       croak("Unsupported Perl type found '%s' "
-            " while converting to Lua value", SvPV_nolen(tmpsv));
+            " while converting to Lua value", SvPV_nolen(padsv));
     }
   }
 
@@ -133,20 +114,15 @@ S_plu_perl_lexical_to_table(lua_State *L)
 static int
 S_plu_perl_lexical_to_luaval(lua_State *L)
 {
-  PADOFFSET ofs;
+  SV *padsv;
   PLU_dTHX;
   PLU_dSTACKASSERT;
 
   PLU_ENTER_STACKASSERT(L);
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
-  ofs = (PADOFFSET)lua_tointeger(L, -1);
-
-  /* NOT_IN_PAD should have been caught at compile time, so
-   * skip checking that here. */
-
-  plu_push_sv(aTHX_ L, PAD_SV(ofs));
+  padsv = (SV *)lua_tointeger(L, -1);
+  plu_push_sv(aTHX_ L, padsv);
 
   PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
   return 1;
@@ -156,7 +132,6 @@ S_plu_perl_lexical_to_luaval(lua_State *L)
 static int
 S_plu_lua_to_perl_lexical(lua_State *L)
 {
-  PADOFFSET ofs;
   int ltype;
   PLU_dTHX;
   SV *sv;
@@ -165,12 +140,9 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   PLU_ENTER_STACKASSERT(L);
 
   PLU_GET_THX(L);
-  /* FIXME check that it's an integer? */
-  ofs = (PADOFFSET)lua_tointeger(L, -2);
-  /* NOT_IN_PAD should have been caught at compile time, so
-   * skip checking that here. */
 
-  sv = PAD_SVl(ofs);
+  sv = (SV *)lua_tointeger(L, -2);
+
   ltype = lua_type(L, -1);
   switch (ltype) {
   case LUA_TNUMBER:
@@ -195,7 +167,7 @@ S_plu_lua_to_perl_lexical(lua_State *L)
     break;
   case LUA_TTABLE:
     SvREFCNT_dec(sv);
-    PAD_SVl(ofs) = plu_new_table_object_perl(aTHX_ L);
+    sv_setsv(sv, plu_new_table_object_perl(aTHX_ L)); /* FIXME? */
     break;
   case LUA_TFUNCTION:
   case LUA_TUSERDATA:

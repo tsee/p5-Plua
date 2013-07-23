@@ -5,6 +5,42 @@
 #include "plu_op.h"
 #include "plu_lua.h"
 
+/* Backport to 5.14 */
+#ifndef PadARRAY
+typedef AV PADNAMELIST;
+typedef SV PADNAME;
+# define PadlistARRAY(pl)      ((PAD **)AvARRAY(pl))
+# define PadlistNAMES(pl)      (*PadlistARRAY(pl))
+# define PadnamelistARRAY(pnl) ((PADNAME **)AvARRAY(pnl))
+# define PadnamelistMAX(pnl)   AvFILLp(pnl)
+# define PadARRAY              AvARRAY
+# define PadnamePV(pn)         (SvPOKp(pn) ? SvPVX(pn) : NULL)
+#endif
+
+
+/* Finds and returns lexical SV. From Devel::LexAlias */
+static SV *
+get_lexical(pTHX_ CV* cv, char *name)
+{
+  PADNAMELIST* padn = cv ? PadlistNAMES(CvPADLIST(cv)) : PL_comppad_name;
+  PAD*         padv = cv ? PadlistARRAY(CvPADLIST(cv))[1] : PL_comppad;
+  SV*          retval = NULL;
+  I32          i;
+
+  for (i = 0; i <= PadnamelistMAX(padn); ++i) {
+    PADNAME* namesv = PadnamelistARRAY(padn)[i];
+    char*    name_str;
+    if (namesv && (name_str = PadnamePV(namesv))) {
+      if (!strcmp(name, name_str)) {
+        if (retval != NULL) /* FIXME put in just because it shouldn't happen (!?) but it does in t/12_...t */
+          abort();
+        retval = PadARRAY(padv)[i];
+      }
+    }
+  }
+  return retval;
+}
+
 void
 plu_munge_lua_code(pTHX_ SV *lcode)
 {
@@ -66,13 +102,22 @@ plu_munge_lua_code(pTHX_ SV *lcode)
 
   n = (unsigned int)av_len(lexical_ary)+1;
   for (i = 0; i < n; ++i) {
+    SV *lexsv;
     name = *av_fetch(lexical_ary, i, 0);
     str = SvPV(name, len);
+    lexsv = get_lexical(aTHX_ PL_compcv, str);
+    SvREFCNT_inc(lexsv); /* FIXME leaks right now! */
+
+    /*
     padoff = pad_findmy(str, len, 0);
     if (LIKELY( padoff != NOT_IN_PAD ))
       (void)hv_store(lexical_hv, str, len, newSViv(padoff), 0);
+      */
     /* No else needed - skipping from HV will cause exception in
      * Perl code called further down. */
+    if (LIKELY( lexsv != NULL ))
+      (void)hv_store(lexical_hv, str, len, newSViv((IV)lexsv), 0);
+
   }
 
   /* Now actually munge the code based on the PAD lookups. */
