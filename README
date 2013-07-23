@@ -124,10 +124,28 @@ I<MORE HACKS!>
 
 The scanner code is modified by C<plu_munge_lua_code> in F<plu_lua_syntax_ext.c>.
 This is currently deals with syntax like "$x.int" or "$x = ...". It works
-by scanning the code with regexes
+by scanning the code with regexes (in Perl, see F<lib/PLua.pm>), then
+doing all lexical PAD offset lookups for the scalars (back in C using variations on
+C<pad_findmy> / C<pad_findmy_pvn>), then doing search/replace of the above
+snippets with things like "perl.val_to_$type($padoffset)".
 
-FIXME
+In order to close over Perl lexicals properly, this will most certainly
+have to be amended.
+
+=item *
+
+The modified code is passed to the Lua compiler, which puts a Lua function
+on the Lua stack (if all goes well), see C<plu_compile_lua_block_or_croak>
+in F<plu_lua.c>.
+
+=item *
+
+Since it's not legal Lua API to pop functions off the stack for outside-Lua-use and
+then putting them back on, we keep them within Lua and use the ref mechanism to
+store it within the lua_State (see Lua's manual on C<luaL_ref>). Then we construct
+a custom OP to hold all the necessary data for runtime, see C<plu_prepare_custom_op>
+in F<plu_op.c>
 
 =back
 
-
+TODO write about run-time behaviour
