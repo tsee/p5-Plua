@@ -11,10 +11,10 @@
 #  define PLU_DEBUG (void)
 #  define PLU_DEBUG_1 (void)
 #  define PLU_DEBUG_2 (void)
-#  define PLU_dSTACKASSERT (void)
-#  define PLU_ENTER_STACKASSERT(L) (void)
-#  define PLU_LEAVE_STACKASSERT(L) (void)
-#  define PLU_LEAVE_STACKASSERT_MODIFIED(L, change) (void)
+#  define PLU_dSTACKASSERT (void)0
+#  define PLU_ENTER_STACKASSERT(L) (void)0
+#  define PLU_LEAVE_STACKASSERT(L) (void)0
+#  define PLU_LEAVE_STACKASSERT_MODIFIED(L, change) (void)0
 #else
    /* define to avoid checking NDEBUG directly */
 #  define PLU_DEBUGGING 1
