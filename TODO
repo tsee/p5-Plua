@@ -33,13 +33,6 @@ Harder:
   => Depends on having lua_State global state moved to per-interpreter logic
   => Likely quite hard to do sanely for the "PLua::Table" Lua table wrapper which is
      tied to a lua_State.
-- Make Lua functions be Perl-level closures for Perl lexicals.
-  => A way to efficiently stash the PAD offsets
-  => This seems fine now for getting perl lexicals:
-     $foo.int, $foo.num, $foo.str all get compiled to a Lua C
-     function call that uses the PAD offset (determined at compile
-     time) to fetch the Perl lexical value.
-  => Setting Perl lexicals: Currently grabs expression to end of line. Good enough?
 - Access to Perl globals where there's no lexicals (and adherence to use strict?)
 - Design: Straight Perl array/hash accesses from Lua?
 - Improved scanning/lexing for finding the end of the Lua blocks.
@@ -51,3 +44,18 @@ Harder:
   regexes. Maybe an extended Lua parser that does transformations and then
   faithfully regenerates Lua code with the same line numbers?
 - Lua line numbers need to be file-level for better debuggability!
+
+HARD:
+- Make Lua functions be Perl-level closures for Perl lexicals.
+  => A way to efficiently stash the PAD offsets
+  => This seems fine now for getting perl lexicals:
+     $foo.int, $foo.num, $foo.str all get compiled to a Lua C
+     function call that uses the PAD offset (determined at compile
+     time) to fetch the Perl lexical value.
+  => Setting Perl lexicals: Currently grabs expression to end of line. Good enough?
+  => pad_findlex (not API) is part of the answer if there is any. To wit, it contains:
+        /* out_capture non-null means caller wants us to capture lex; in
+         * addition we capture ourselves unless it's an ANON/format */
+        new_capturep = out_capture ? out_capture :
+                       CvLATE(cv) ? NULL : &new_capture;
+
