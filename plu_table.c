@@ -7,19 +7,30 @@ plu_table_t *
 plu_new_table_object(pTHX_ lua_State *ls)
 {
   plu_table_t *t;
+  int tblid;
+  PLU_dSTACKASSERT;
+  PLU_ENTER_STACKASSERT(ls);
+
+  tblid = luaL_ref(ls, LUA_REGISTRYINDEX);
+
   Newx(t, 1, plu_table_t);
   t->L = ls;
-  t->registry_index = luaL_ref(ls, LUA_REGISTRYINDEX);
+  t->registry_index = tblid;
+
+  PLU_LEAVE_STACKASSERT_MODIFIED(ls, -1);
   return t;
 }
 
 SV *
-plu_new_table_object_perl(pTHX_ lua_State *ls)
+plu_new_table_object_perl(pTHX_ lua_State *L)
 {
   SV *sv;
-  plu_table_t *tbl = plu_new_table_object(aTHX_ ls);
+  PLU_dSTACKASSERT;
+  PLU_ENTER_STACKASSERT(L);
+  plu_table_t *tbl = plu_new_table_object(aTHX_ L);
   sv = newSV(0);
   sv_setref_pv( sv, "PLua::Table", (void*)tbl );
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, -1);
   return sv;
 }
 
