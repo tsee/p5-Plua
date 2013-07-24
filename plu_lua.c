@@ -138,7 +138,6 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   PLU_dSTACKASSERT;
 
   PLU_ENTER_STACKASSERT(L);
-
   PLU_GET_THX(L);
 
   sv = (SV *)lua_tointeger(L, -2);
@@ -166,8 +165,10 @@ S_plu_lua_to_perl_lexical(lua_State *L)
     lua_pop(L, 1);
     break;
   case LUA_TTABLE:
-    SvREFCNT_dec(sv);
-    sv_setsv(sv, plu_new_table_object_perl(aTHX_ L)); /* FIXME? */
+    {
+      SV * const tmp = plu_new_table_object_perl(aTHX_ L);
+      SvSetMagicSV(sv, tmp);
+    }
     break;
   case LUA_TFUNCTION:
   case LUA_TUSERDATA:
