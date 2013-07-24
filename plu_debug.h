@@ -15,6 +15,7 @@
 #  define PLU_ENTER_STACKASSERT(L) (void)0
 #  define PLU_LEAVE_STACKASSERT(L) (void)0
 #  define PLU_LEAVE_STACKASSERT_MODIFIED(L, change) (void)0
+#  define PLU_DEBUG_STACKSIZE(L, id) (void)0
 #else
    /* define to avoid checking NDEBUG directly */
 #  define PLU_DEBUGGING 1
@@ -63,6 +64,10 @@
             lua_gettop((L)), __FILE__, __LINE__);                             \
     }                                                                         \
   } STMT_END
+
+  /* Print Lua stack size to STDERR */
+#  define PLU_DEBUG_STACKSIZE(L, id) \
+    warn("Lua stack size (%s): %i\n", id, (int)lua_gettop(L));
 #endif
 
 #endif
