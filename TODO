@@ -5,7 +5,6 @@ Relatively Easy:
 - More documentation!
 - More tests!
 - Improved build system.
-- Internals documentation to lower barrier to entry.
 - lua_State Perl abstraction (wrapper written in XS) with some of the
   main bits of interface wrapped for Perl.
 - Other Lua/Perl individual type conversions
