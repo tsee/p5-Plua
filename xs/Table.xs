@@ -117,6 +117,7 @@ plu_table_t::to_array(int recursive = 0)
     RETVAL = plu_table_obj_to_array(aTHX_ THIS, recursive);
   OUTPUT: RETVAL
 
+
 AV *
 plu_table_t::to_array_shifted(int recursive = 0)
   CODE:
@@ -128,6 +129,20 @@ plu_table_t::to_array_shifted(int recursive = 0)
     }
   OUTPUT: RETVAL
 
+
+size_t
+plu_table_t::objlen()
+  PREINIT:
+    PLU_dSTACKASSERT;
+    lua_State *L;
+  CODE:
+    L = THIS->L;
+    PLU_ENTER_STACKASSERT(L);
+    PLU_TABLE_PUSH_TO_STACK(*THIS);
+    RETVAL = lua_objlen(L, -1);
+    lua_pop(L, 1);
+    PLU_LEAVE_STACKASSERT(L);
+  OUTPUT: RETVAL
 
 
 SV *
