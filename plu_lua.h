@@ -7,16 +7,13 @@
 #include <perl.h>
 
 #include <lua.h>
+#include "plu_inline.h"
 #include "plu_table.h"
-#include "plu_lua_inline.h"
 
 /* Create new Lua interpreter and initialize it */
 lua_State *plu_new_lua_state(pTHX);
 
 int plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len);
-
-/* Returns status from executing lua_func_name. Uses global PLU_lua_int */
-/* int plu_call_lua_func(pTHX_ const char *lua_func_name); */
 
 /* Returns status from executing Lua func (previous stored in registry).
  * Uses global PLU_lua_int */
@@ -26,16 +23,25 @@ int plu_call_lua_func_via_registry(pTHX_ const int registry_idx);
 SV *plu_get_lua_errmsg(pTHX);
 
 /* Implemented in plu_lua_inline.h */
-/*PLU_STATIC_INLINE SV *plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)*/
+PLU_STATIC_INLINE SV *plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop);
 
-/* Push a Perl hash onto the Lua stack */
+/* Implemented in plu_lua_inline.h */
+/* Push a Perl SV onto the Lua stack - croaks on errors */
+PLU_STATIC_INLINE void plu_push_sv(pTHX_ lua_State *L, SV * const sv);
+
+/* Push a Perl hash onto the Lua stack - croaks on errors */
 void plu_push_hash(pTHX_ lua_State *L, HV *hv);
 
-/* Push a Perl array onto the Lua stack */
+/* Push a Perl array onto the Lua stack - croaks on errors */
 void plu_push_ary(pTHX_ lua_State *L, AV *av);
 
-/* Push the table of an XS PLua::Table object to the Lua stack. Uses the Lua state that
- * the actual table lives in. */
+/* Push the table of an XS PLua::Table object to the Lua stack. Necessarily
+ * uses the Lua state that the actual table lives in. */
 int plu_push_table_obj(pTHX_ SV *sv);
+
+#include "plu_lua_inline.h"
+
+/* Returns status from executing lua_func_name. Uses global PLU_lua_int */
+/* int plu_call_lua_func(pTHX_ const char *lua_func_name); */
 
 #endif

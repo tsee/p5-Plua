@@ -4,6 +4,7 @@
 /* inlined bits of plu_lua.h */
 
 #include "plu_inline.h"
+#include "plu_debug.h"
 
 /* Greatly inspired by Inline::Lua! */
 /* Turns a Lua type into a Perl type and returns it.  
@@ -45,6 +46,50 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
   default:
     croak("Unknown/unsupported Lua type detected");
   }
+}
+
+/* Convert Perl SV to SOME Lua value on Lua stack */
+PLU_STATIC_INLINE void
+plu_push_sv(pTHX_ lua_State *L, SV * const sv)
+{
+  PLU_dSTACKASSERT;
+
+  PLU_ENTER_STACKASSERT(L);
+
+  if (SvROK(sv)) {
+    if (sv_derived_from(sv, "PLua::Table")) {
+      plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(sv));
+      PLU_TABLE_PUSH_TO_STACK(*tbl);
+    }
+    else {
+      SV * const inner = SvRV(sv);
+      svtype type = SvTYPE(inner);
+      if (type == SVt_PVHV)
+        plu_push_hash(aTHX_ L, (HV *)inner);
+      else if (type == SVt_PVAV)
+        plu_push_ary(aTHX_ L, (AV *)inner);
+      else {
+        croak("Unsupported Perl type/reference found '%s' "
+              " while converting to Lua value", SvPV_nolen(sv));
+      }
+    }
+  } /* end if "if it's a reference */
+  else if (SvNOK(sv))
+    lua_pushnumber(L, (lua_Number)SvNV(sv));
+  else if (SvIOK(sv))
+    lua_pushinteger(L, (lua_Integer)SvIV(sv));
+  else if (SvPOK(sv)) {
+    STRLEN len;
+    char *str;
+    str = SvPV(sv, len);
+    lua_pushlstring(L, str, (size_t)len);
+  }
+  else {
+    croak("Unsupported Perl type found '%s' "
+          " while converting to Lua value", SvPV_nolen(sv));
+  }
+
+  PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
 }
 
 #endif

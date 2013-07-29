@@ -145,36 +145,10 @@ S_plu_perl_lexical_to_luaval(lua_State *L)
 
   /* NOT_IN_PAD should have been caught at compile time, so
    * skip checking that here. */
-  {
-    SV * const tmpsv = PAD_SV(ofs);
-    if (SvROK(tmpsv)) {
-      if (sv_derived_from(tmpsv, "PLua::Table")) {
-        plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(tmpsv));
-        PLU_TABLE_PUSH_TO_STACK(*tbl);
-      }
-      else {
-        croak("Unsupported Perl type/reference found '%s' "
-              " while converting to Lua value", SvPV_nolen(tmpsv));
-      }
-    }
-    else if (SvNOK(tmpsv))
-      lua_pushnumber(L, (lua_Number)SvNV(tmpsv));
-    else if (SvIOK(tmpsv))
-      lua_pushinteger(L, (lua_Integer)SvIV(tmpsv));
-    else if (SvPOK(tmpsv)) {
-      STRLEN len;
-      char *str;
-      str = SvPV(tmpsv, len);
-      lua_pushlstring(L, str, (size_t)len);
-    }
-    else {
-      croak("Unsupported Perl type found '%s' "
-            " while converting to Lua value", SvPV_nolen(tmpsv));
-    }
-  }
+
+  plu_push_sv(aTHX_ L, PAD_SV(ofs));
 
   PLU_LEAVE_STACKASSERT_MODIFIED(L, 1);
-
   return 1;
 }
 
@@ -304,14 +278,6 @@ plu_get_lua_errmsg(pTHX)
   return errmsg;
 }
 
-/*
-int
-plu_call_lua_func(pTHX_ const char *lua_func_name)
-{
-  lua_getfield(PLU_lua_int, LUA_GLOBALSINDEX, lua_func_name);
-  return lua_pcall(PLU_lua_int, 0, 0, 0);
-}
-*/
 
 int
 plu_call_lua_func_via_registry(pTHX_ const int registry_idx)
@@ -348,8 +314,8 @@ plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len)
   return status;
 }
 
+
 /* Inline::Lua inspired! Push a Perl hash onto the Lua stack */
-/*
 void
 plu_push_hash(pTHX_ lua_State *L, HV *hv)
 {
@@ -363,15 +329,13 @@ plu_push_hash(pTHX_ lua_State *L, HV *hv)
   while ((he = hv_iternext(hv))) {
     key = hv_iterkey(he, &len);
     lua_pushlstring(L, key, len);
-    push_val(L, hv_iterval(hv, he));
+    plu_push_sv(aTHX_ L, hv_iterval(hv, he));
     lua_settable(L, -3);
   }
 }
-*/
 
 
 /* Inline::Lua inspired! Push a Perl array onto the Lua stack */
-/*
 void
 plu_push_ary(pTHX_ lua_State *L, AV *av)
 {
@@ -382,14 +346,14 @@ plu_push_ary(pTHX_ lua_State *L, AV *av)
   for (i = 0; i < n; i++) {
     SV **ptr = av_fetch(av, (IV)i, FALSE);
     lua_pushnumber(L, (lua_Number)i+1);
-    if (LIKELY( ptr ))
-      push_val(L, *ptr);
+    if (LIKELY( ptr != NULL ))
+      plu_push_sv(aTHX_ L, *ptr);
     else
       lua_pushnil(L);
     lua_settable(L, -3);
   }
 }
-*/
+
 
 int
 plu_push_table_obj(pTHX_ SV *sv)
@@ -403,3 +367,12 @@ plu_push_table_obj(pTHX_ SV *sv)
   return 0;
 }
 
+
+/*
+int
+plu_call_lua_func(pTHX_ const char *lua_func_name)
+{
+  lua_getfield(PLU_lua_int, LUA_GLOBALSINDEX, lua_func_name);
+  return lua_pcall(PLU_lua_int, 0, 0, 0);
+}
+*/
