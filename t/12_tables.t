@@ -3,8 +3,9 @@ use strict;
 use warnings;
 use Test::More;
 use PLua;
+use PLua::Table qw(SHALLOW RECURSIVE);
 
-plan tests => 21;
+plan tests => 22;
 
 # Test Plua::Table API
 
@@ -30,8 +31,10 @@ is_deeply([sort @{$tbl->keys}], [qw(foo key nasty tbl)], "keys() returns right a
 
 my $hash = $tbl2->to_hash;
 is_deeply($hash, {1 => 5, 2 => 8}, "Inner hash converted ok");
+$hash = $tbl2->to_hash(SHALLOW);
+is_deeply($hash, {1 => 5, 2 => 8}, "Inner hash converted ok (explicit shallow)");
 
-$hash = $tbl->to_hash(1);
+$hash = $tbl->to_hash(RECURSIVE);
 is_deeply($hash, {key => 5, foo => 13, tbl => {1 => 5, 2 => 8}, nasty => {0 => 2, 1 => 3}}, "Outer hash converted ok");
 
 my $ary = $tbl2->to_array;

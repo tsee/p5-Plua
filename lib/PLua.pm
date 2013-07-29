@@ -6,6 +6,10 @@ use Carp qw(croak);
 use XSLoader;
 
 our $VERSION = '0.01';
+use PLua::Table qw(RECURSIVE SHALLOW);
+use Exporter 'import';
+our @EXPORT_OK = (@PLua::Table::EXPORT_OK);
+our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
 SCOPE: {
   my $ident = qr/[a-zA-Z0-9_]+/;
@@ -111,12 +115,19 @@ PLua - Perl and Lua Make a Great Couple!
 
 =head1 DESCRIPTION
 
+B<This module is considered to be very highly experimental. It is not
+considered production-quality code by its authors. If you intend to
+disregard this warning and use it in production then please get in
+touch to discuss what's blocking safe production use.>
+
 This Perl module aims at providing seamless integration between Perl and Lua
 and efficiently so. At any place in your Perl code, you can use C<PLua> to embed
 blocks of Lua code and from within, access your Perl lexicals! (But see the
 closure gotcha below.)
 
 TODO write more documentation!
+
+On Lua tables, see also: L<PLua::Table>.
 
 =head1 THE CLOSURE GOTCHA
 
