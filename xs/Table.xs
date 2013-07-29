@@ -69,6 +69,7 @@ plu_table_t::set_int(key, value)
     PLU_dSTACKASSERT;
     lua_State *L;
   CODE:
+    /* TODO generic "set" with auto-convert! */
     L = THIS->L;
     PLU_ENTER_STACKASSERT(L);
     /* FIXME this isn't exception-clean */
@@ -107,6 +108,7 @@ plu_table_t::set_int(key, value)
 HV *
 plu_table_t::to_hash(int recursive = 0)
   CODE:
+    /* FIXME check for reference loops in Lua tables? */
     RETVAL = plu_table_obj_to_hash(aTHX_ THIS, recursive);
   OUTPUT: RETVAL
 
@@ -114,6 +116,7 @@ plu_table_t::to_hash(int recursive = 0)
 AV *
 plu_table_t::to_array(int recursive = 0)
   CODE:
+    /* FIXME check for reference loops in Lua tables? */
     RETVAL = plu_table_obj_to_array(aTHX_ THIS, recursive);
   OUTPUT: RETVAL
 
