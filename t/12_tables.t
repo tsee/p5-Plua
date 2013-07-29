@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 
-plan tests => 16;
+plan tests => 20;
 
 # Test Plua::Table API
 
@@ -24,6 +24,9 @@ is($tbl->get("tbl")->get("1"), undef, "Inner table access using wrong type");
 $tbl->set_int("foo", 13);
 is($tbl->get("foo"), 13, "Simple table member works after set");
 $tbl2 = $tbl->get("tbl");
+
+is(ref($tbl->keys), 'ARRAY', "keys() returns array ref");
+is_deeply([sort @{$tbl->keys}], [qw(foo key nasty tbl)], "keys() returns right array ref");
 
 my $hash = $tbl2->to_hash;
 is_deeply($hash, {1 => 5, 2 => 8}, "Inner hash converted ok");
@@ -71,6 +74,15 @@ SCOPE: {
   }
   is($bar, 42, "Nasty chaining");
 }
+
+# test objlen and friends on an array-like table
+my $numtbl;
+lua {{
+  $numtbl = {2,3,6,8}
+}}
+
+is($numtbl->objlen, 4, "Numeric table objlen() works");
+is_deeply([sort @{$numtbl->keys}], [1,2,3,4], "Numeric table keys still works");
 
 pass("Alive");
 

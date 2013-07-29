@@ -178,3 +178,35 @@ plu_table_obj_to_array(pTHX_ plu_table_t *THIS, int recursive)
 
   return RETVAL;
 }
+
+
+AV *
+plu_table_obj_to_keys_array(pTHX_ plu_table_t *THIS)
+{
+  PLU_dSTACKASSERT;
+  int table_stack_offset;
+  lua_State *L;
+  SV *sv;
+  AV *RETVAL;
+
+  L = THIS->L;
+  PLU_ENTER_STACKASSERT(L);
+  PLU_TABLE_PUSH_TO_STACK(*THIS);
+
+  RETVAL = newAV();
+  sv_2mortal((SV *)RETVAL);
+  table_stack_offset = lua_gettop(L);
+
+  lua_pushnil(L);  /* first key */
+  while (lua_next(L, table_stack_offset) != 0) {
+    /* uses 'key' (at index -2) and 'value' (at index -1) */
+    lua_pop(L, 1);
+    sv = plu_luaval_to_perl_safe(aTHX_ L, -1); /* need safe version to keep key for next iter */
+    av_push(RETVAL, sv);
+  }
+  lua_pop(L, 1);
+
+  PLU_LEAVE_STACKASSERT(L);
+
+  return RETVAL;
+}

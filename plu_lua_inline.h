@@ -12,6 +12,7 @@
  * otherwise 0.
  * The only case where this does not happen is if the value
  * is a LUA_TFUNCTION (luaL_ref() already pops it off). */
+/* FIXME If idx is != -1, then "dopop" isn't necessarily reliable... */
 /* Returned SV is NOT mortalized */
 PLU_STATIC_INLINE SV *
 plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
@@ -37,6 +38,37 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
       else {
         sv = plu_new_table_object_perl(aTHX_ L);
       }
+      return sv;
+    }
+  case LUA_TFUNCTION:
+    croak("Cannot convert a Lua function yet");
+    /**dopop = 0;
+    return func_ref(L);*/
+  default:
+    croak("Unknown/unsupported Lua type detected");
+  }
+}
+
+
+/* Safe, possibly slower version of the above. ALWAYS requires pop'ing */
+/* Returned SV is NOT mortalized */
+PLU_STATIC_INLINE SV *
+plu_luaval_to_perl_safe(pTHX_ lua_State *L, int idx)
+{
+  switch (lua_type(L, idx)) {
+  case LUA_TNIL:
+    return &PL_sv_undef;
+  case LUA_TBOOLEAN:
+    return newSViv(lua_toboolean(L, idx));
+  case LUA_TNUMBER:
+    return newSVnv(lua_tonumber(L, idx));
+  case LUA_TSTRING:
+    return newSVpvn(lua_tostring(L, idx), lua_strlen(L, idx));
+  case LUA_TTABLE:
+    {
+      SV *sv;
+      lua_pushvalue(L, idx);
+      sv = plu_new_table_object_perl(aTHX_ L);
       return sv;
     }
   case LUA_TFUNCTION:
