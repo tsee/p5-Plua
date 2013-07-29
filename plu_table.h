@@ -29,6 +29,9 @@ AV *plu_table_obj_to_array(pTHX_ plu_table_t *THIS, int recursive);
 /* Returns a Perl AV of keys in the Lua table */
 AV *plu_table_obj_to_keys_array(pTHX_ plu_table_t *THIS);
 
+/* Returns a Perl AV of values in the Lua table */
+AV *plu_table_obj_to_values_array(pTHX_ plu_table_t *THIS);
+
 #define PLU_TABLE_PUSH_TO_STACK(tbl) \
     lua_rawgeti((tbl).L, LUA_REGISTRYINDEX, (tbl).registry_index)
 

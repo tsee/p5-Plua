@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 
-plan tests => 20;
+plan tests => 21;
 
 # Test Plua::Table API
 
@@ -83,6 +83,7 @@ lua {{
 
 is($numtbl->objlen, 4, "Numeric table objlen() works");
 is_deeply([sort @{$numtbl->keys}], [1,2,3,4], "Numeric table keys still works");
+is_deeply([sort @{$numtbl->values}], [2,3,6,8], "Numeric table values still works");
 
 pass("Alive");
 

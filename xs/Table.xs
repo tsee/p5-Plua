@@ -152,6 +152,13 @@ plu_table_t::keys()
   OUTPUT: RETVAL
 
 
+AV *
+plu_table_t::values()
+  CODE:
+    RETVAL = plu_table_obj_to_values_array(aTHX_ THIS);
+  OUTPUT: RETVAL
+
+
 SV *
 _make_table()
   PREINIT:
