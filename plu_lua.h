@@ -19,7 +19,7 @@ int plu_compile_lua_block_or_croak(pTHX_ char *code, STRLEN len);
  * Uses global PLU_lua_int */
 int plu_call_lua_func_via_registry(pTHX_ const int registry_idx);
 
-/* Call this after plu_call_lua_func returns != 0 */
+/* Call this after plu_call_lua_func returns != 0 to get error message as string SV (mortalized) */
 SV *plu_get_lua_errmsg(pTHX);
 
 /* Implemented in plu_lua_inline.h */

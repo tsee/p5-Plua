@@ -17,18 +17,10 @@ plu_pp_custom(pTHX)
   aux = (plu_op_aux_t *)PL_op->op_targ;
 
   status = plu_call_lua_func_via_registry(aTHX_ aux->func_registry_idx);
-  switch (status) {
-    case 0:
-      break;
-    case LUA_ERRRUN:
-    case LUA_ERRMEM:
-    case LUA_ERRERR:
-      {
-        SV *err = plu_get_lua_errmsg(aTHX);
-        lua_pop(PLU_lua_int, 1);
-        croak("%s", SvPVX(err));
-        break;
-      }
+  if (UNLIKELY( status != 0 )) {
+    SV *err = plu_get_lua_errmsg(aTHX);
+    lua_pop(PLU_lua_int, 1);
+    croak("%s", SvPVX(err));
   }
   /*if (aux->test != NOT_IN_PAD) {
     SV *s = PAD_SVl(aux->test);

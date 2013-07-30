@@ -8,6 +8,8 @@
 #include "plu_debug.h"
 #include "plu_perl_context.h"
 #include "plu_global_state.h"
+#include "plu_table.h"
+#include "plu_lua_function.h"
 
 #include <lua.h>
 #include <lualib.h>
@@ -198,6 +200,8 @@ S_plu_lua_to_perl_lexical(lua_State *L)
     PAD_SVl(ofs) = plu_new_table_object_perl(aTHX_ L);
     break;
   case LUA_TFUNCTION:
+    PAD_SVl(ofs) = plu_new_function_object_perl(aTHX_ L);
+    break;
   case LUA_TUSERDATA:
   case LUA_TTHREAD:
   case LUA_TLIGHTUSERDATA:
@@ -376,3 +380,4 @@ plu_call_lua_func(pTHX_ const char *lua_func_name)
   return lua_pcall(PLU_lua_int, 0, 0, 0);
 }
 */
+
