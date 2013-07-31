@@ -133,11 +133,12 @@ On Lua tables, see also: L<PLua::Table>.
 
 In a nutshell, Lua functions aren't Perl closures. Maybe this
 can be addressed one day, but for the time being, the author's understanding
-of the implementation of Perl closures isn't strong enough.
+of the implementation of Perl and Lua closures is that getting this
+to work requires a better man than him.
 
 Consider the following code:
 
-  if (1) {
+  {
     my $bar = 12;
     lua {
       function foo()
@@ -162,8 +163,10 @@ So in a nutshell, this code may or may not print "13" as you might
 expect. I could also print something else or quite possibly segfault.
 
 So don't use Lua functions to provide access to Perl lexicals outside
-their scope. If you need to do that, send a patch, pay me to work on
-supporting this (just kidding), or work around it. Sorry.
+their scope. If you need to do that, send a well-tested patch,
+or work around it. Sorry. Nowadays, with Lua functions being first-class
+objects in Perl, this shouldn't be too painful to work around in most
+cases.
 
 =head1 AUTHOR
 
