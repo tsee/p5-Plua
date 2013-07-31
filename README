@@ -180,10 +180,58 @@ Whenever we want to do any operation on the table, we have to first fetch
 the actual table reference from the Lua registry and put it on the Lua stack.
 This is done using the C<PLU_TABLE_PUSH_TO_STACK> macro (F<plu_table.h>).
 
+In the destructor of the C<PLua::Table> object, we use C<luaL_unref> to
+release our reference to the handle, allowing Lua to GC it.
+
 Of course, this all means that C<PLua::Table>s will never travel between
 C<lua_State>s and this could be "interesting" once having multiple
 Lua interpreters is actually possible.
 
 =head2 How does the Lua function wrapping work?
 
-FIXME
+Fundamentally, wrapping a Lua function for Perl works with the same Lua-side
+tricks as the table wrapping. The code lives in F<plu_lua_function.{c,h}>.
+On top of that, function wrappers require a number of additional tricks to
+work:
+
+These function wrappers are actual Perl subroutine references that just so
+happen to be blessed into the C<PLua::Function> package. This is purely so
+that the destructor can release the reference to the Lua function that we've
+stashed (see above). But it gets even more weird!
+
+A very simple way to implement this would be to have a generic "call a Lua
+function by name or registry index (see above)" function and then to attach
+the registry index (or conceivably, name) in Perl space using a closure:
+
+  # THIS IS NOT HOW IT REALLY WORKS!
+  sub make_lua_wrapper {
+    my ($registry_index, $lua_state) = @_;
+    return sub {
+      return _invoke_lua_function($lua_state, $registry_index, \@_);
+    }
+  }
+
+This would just create a Perl closure over the necessary data and store &
+encapsulate it that way. Perl closures are fantastic devices. Alas,
+this scheme requires three function calls, one being the Perl closure,
+one being the C<_call_into_lua> XSUB, one being the actual Lua function.
+PLua is all about performance (and convenience), so that doesn't fly.
+
+Instead, we use a trick inspired by the C<Class::XSAccessor>
+CPAN module. There is a detailed explanation of the technique in the
+source comments of that code base. In a nutshell, a Perl CV* (the
+Perl struct typedef for "Code Values", subroutines) contains a union
+(cf. C<XSANY>) that is used to implement the XS C<ALIAS>
+(see L<perlxs>) feature. It can store an integer indicating the XSUB
+alias to call. It can also store a pointer. The trick is to have one
+invoker XSUB like the above C<_invoke_lua_function> (in F<xs/Function.xs>)
+and then we create a new Perl-side subroutine reference of that same
+XSUB over and over again using C<newXS>. Yes, this means that all Lua
+function wrappers are really Perl-side references to the same C function.
+But the Perl-side references are curried by storing a pointer to a
+C<plu_function_t> struct in the C<XSANY.any_ptr> which holds the information
+about the Lua function to call. Et voila, we've done away with that
+pesky slow Perl closure. Queue maniacal laughter.
+
+The rest is just marshalling data back and forth.
+
