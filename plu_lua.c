@@ -26,7 +26,6 @@ S_plu_perl_lexical_to_integer(lua_State *L)
   PLU_ENTER_STACKASSERT(L);
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -54,7 +53,6 @@ S_plu_perl_lexical_to_number(lua_State *L)
 
   PLU_GET_THX(L);
 
-  /* FIXME check that it's a integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -81,7 +79,6 @@ S_plu_perl_lexical_to_string(lua_State *L)
 
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -109,7 +106,6 @@ S_plu_perl_lexical_to_table(lua_State *L)
   PLU_ENTER_STACKASSERT(L);
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -142,7 +138,6 @@ S_plu_perl_lexical_to_luaval(lua_State *L)
   PLU_ENTER_STACKASSERT(L);
   PLU_GET_THX(L);
 
-  /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -1);
 
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -172,7 +167,6 @@ S_plu_lua_to_perl_lexical(lua_State *L)
    * we're executing in a co-routine) */
   real_lua_int = lua_tothread(L, lua_upvalueindex(PLU_N_THX_ARGS+1));
 
-  /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -2);
   /* NOT_IN_PAD should have been caught at compile time, so
    * skip checking that here. */
