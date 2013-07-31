@@ -38,19 +38,20 @@ plu_table_t::get(key)
   CODE:
     L = THIS->L;
     PLU_ENTER_STACKASSERT(L);
-    /* FIXME things other than numbers and strings as keys */
-    if (SvFLAGS(key) & (SVf_IOK|SVf_NOK)) {
-      PLU_TABLE_PUSH_TO_STACK(*THIS);
-      lua_pushnumber(L, SvNV(key));
-    }
-    else {
-      PLU_TABLE_PUSH_TO_STACK(*THIS);
-      str = SvPV(key, len);
-      lua_pushlstring(L, str, (size_t)len);
-    }
+
+    /* Push table and key to stack */
+    PLU_TABLE_PUSH_TO_STACK(*THIS);
+    plu_push_sv(aTHX_ L, key);
+    PLU_LEAVE_STACKASSERT_MODIFIED(L, 2); /* table + key */
+
+    /* Fetch value, replacing key */
     lua_gettable(L, -2);
+    PLU_LEAVE_STACKASSERT_MODIFIED(L, 2); /* table + value */
+
+    /* Convert value */
     RETVAL = plu_luaval_to_perl(aTHX_ L, -1, &dopop);
     lua_pop(L, dopop+1);
+
     PLU_LEAVE_STACKASSERT(L);
   OUTPUT: RETVAL
 
