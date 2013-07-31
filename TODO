@@ -10,6 +10,8 @@ Relatively Easy:
   => In both cases, what's the syntax to mark a function as exported? Or
       should they all have transparent access to everything? That's overdoing
       it, isn't it?
+- Add checks/exceptions to make sure that table objects passed back into
+  a lua_State are referring to the same Lua state!
 
 Medium:
 - Type conversion between Perl and Lua - Tables are hashes AND arrays. The fun!
