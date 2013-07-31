@@ -74,15 +74,13 @@ plu_table_t::set_int(key, value)
     L = THIS->L;
     PLU_ENTER_STACKASSERT(L);
     /* FIXME this isn't exception-clean */
-    if (SvFLAGS(key) & (SVf_IOK|SVf_NOK)) {
-      PLU_TABLE_PUSH_TO_STACK(*THIS);
-      lua_pushnumber(L, SvNV(key));
-    }
-    else {
-      PLU_TABLE_PUSH_TO_STACK(*THIS);
-      str = SvPV(key, len);
-      lua_pushlstring(L, str, (size_t)len);
-    }
+
+    /* Push table & key */
+    PLU_TABLE_PUSH_TO_STACK(*THIS);
+    plu_push_sv(aTHX_ L, key);
+    PLU_LEAVE_STACKASSERT_MODIFIED(L, 2); /* table + key */
+
+    /* Push value */
     switch (ix) {
     case 0:
       lua_pushinteger(L, SvIV(value));
