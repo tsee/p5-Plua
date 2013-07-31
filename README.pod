@@ -86,7 +86,7 @@ Create and register the description of our custom Lua OP (C<PLU_xop>).
 Also register a hook for freeing OPs of our custom type since they
 have additional data attached to each instance.
 
-=iteam *
+=item *
 
 Register our keyword plugin (see function C<plu_my_keyword_plugin>
 in F<plu_parse_kw.h>).
