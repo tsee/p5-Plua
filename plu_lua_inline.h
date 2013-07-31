@@ -101,6 +101,7 @@ plu_push_sv(pTHX_ lua_State *L, SV * const sv)
       else if (type == SVt_PVAV)
         plu_push_ary(aTHX_ L, (AV *)inner);
       else {
+        PLU_LEAVE_STACKASSERT(L);
         croak("Unsupported Perl type/reference found '%s' "
               " while converting to Lua value", SvPV_nolen(sv));
       }
@@ -117,6 +118,7 @@ plu_push_sv(pTHX_ lua_State *L, SV * const sv)
     lua_pushlstring(L, str, (size_t)len);
   }
   else {
+    PLU_LEAVE_STACKASSERT(L);
     croak("Unsupported Perl type found '%s' "
           " while converting to Lua value", SvPV_nolen(sv));
   }
