@@ -72,6 +72,12 @@ At this point, that has little to no bearing on use within PLua, but
 as more lower-level C<lua_State> APIs are exposed to Perl, this may
 change.
 
+=head2 Exports
+
+Optionally exports C<SHALLOW> and C<RECURSIVE> constants as a more
+readable convenience to constants passed in to some conversion
+functions, see below.
+
 =head1 METHODS
 
 =head2 new
