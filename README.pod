@@ -9,7 +9,7 @@ unreasonably possible!
 
 Lua (and specifically luajit) is really rather efficient. And it's a
 safe language. A "scripting" language. And it's not too painful to
-deal with from C. The motivation is to allow Perl to use
+deal with from C. Consequently, the idea behind I<PLua> is to allow Perl to use
 tightly-coupled blocks of embedded Lua code to speed up hot code paths.
 
 In other words, you can do this:
@@ -27,7 +27,8 @@ The details are (likely unsurprisingly) a bit involved.
 
 Since this is an experiment and proof-of-principle quality code base
 this README is initially (hopefully) going to be mostly a guide to
-getting started with hacking on PLua itself.
+getting started with hacking on PLua itself. That information is
+likely to move on to a different location in a later stage.
 
 =head1 Building
 
