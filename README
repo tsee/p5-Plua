@@ -55,7 +55,7 @@ is a horrible hack), I usually work like this:
 
 Which is still fast enough with this code base. Patches welcome (really).
 
-=head1 Understanding the Implementation
+=head1 UNDERSTANDING THE IMPLEMENTATION
 
 You'll need at least some basic knowledge of the Perl API in order to make
 sense of this, I suppose.
@@ -130,7 +130,8 @@ C<pad_findmy> / C<pad_findmy_pvn>), then doing search/replace of the above
 snippets with things like "perl.val_to_$type($padoffset)".
 
 In order to close over Perl lexicals properly, this will most certainly
-have to be amended.
+have to be amended. Or Lua functions (NOT Lua blocks) closing over lexicals will
+have to be abandoned in favor of exposing functions directly.
 
 =item *
 
@@ -148,4 +149,41 @@ in F<plu_op.c>
 
 =back
 
+=head2 What happens when Perl is about to execute a Lua block?
+
 TODO write about run-time behaviour
+
+=head2 How does the Lua table wrapping work?
+
+Lua tables are a kind of bastard child of arrays and dictionaries. Even if I'll
+be tried for heresy by saying this: Kind of like PHP "arrays", except more
+powerful (keys can be anything). This does not map perfectly to Perl arrays
+or hashes. Complete automatic mashalling just isn't going to DWYM entirely,
+so the design of PLua is to make it easy to get what you want, but not automatic.
+For this purpose, PLua will convert a table to an instance of the C<PLua::Table>
+class instead of to a hash or array. This class (implemented in F<xs/Table.xs>
+and F<plu_table.{c,h}>) allows the user to explicitly convert the table to
+an array, a hash, or inspect and manipulate it directly.
+
+Due to Lua's object ownership, the implementation of that class is a little
+I<interesting>. It is not (safely) possible to get the actual table out of
+the C<lua_State> and the only table inspection/manipulation API from C is to
+have the table object on the Lua stack and then calling stack-based API
+functions. If we want to be able to pass around references to such a table in
+Perl space, then we have to somehow reference it at a distance without having
+a straight C pointer. When creating the C<PLua::Table>, we use C<luaL_ref> to
+store a reference to the table in the Lua registry (read up on this in the Lua
+manual now if that's not familiar to you). To this effect, a C<PLua::Table>
+is a struct that holds a pointer to the C<lua_State> that the table belongs to,
+plus an integer indicating the registry index of our stashed reference.
+Whenever we want to do any operation on the table, we have to first fetch
+the actual table reference from the Lua registry and put it on the Lua stack.
+This is done using the C<PLU_TABLE_PUSH_TO_STACK> macro (F<plu_table.h>).
+
+Of course, this all means that C<PLua::Table>s will never travel between
+C<lua_State>s and this could be "interesting" once having multiple
+Lua interpreters is actually possible.
+
+=head2 How does the Lua function wrapping work?
+
+FIXME
