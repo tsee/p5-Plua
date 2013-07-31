@@ -3,7 +3,6 @@ PROTOTYPES: DISABLE
 
 void
 _invoke_lua_function(...)
-  ALIAS:
   PREINIT:
     plu_function_t *func;
     lua_State *L;
