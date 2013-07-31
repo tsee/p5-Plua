@@ -162,11 +162,16 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   int ltype;
   PLU_dTHX;
   SV *sv;
+  lua_State *real_lua_int;
   PLU_dSTACKASSERT;
 
   PLU_ENTER_STACKASSERT(L);
 
   PLU_GET_THX(L);
+  /* Get the real Lua interpreter (may differ from L if
+   * we're executing in a co-routine) */
+  real_lua_int = lua_tothread(L, lua_upvalueindex(PLU_N_THX_ARGS+1));
+
   /* FIXME check that it's an integer? */
   ofs = (PADOFFSET)lua_tointeger(L, -2);
   /* NOT_IN_PAD should have been caught at compile time, so
@@ -197,10 +202,10 @@ S_plu_lua_to_perl_lexical(lua_State *L)
     break;
   case LUA_TTABLE:
     SvREFCNT_dec(sv);
-    PAD_SVl(ofs) = plu_new_table_object_perl(aTHX_ L);
+    PAD_SVl(ofs) = plu_new_table_object_perl(aTHX_ real_lua_int);
     break;
   case LUA_TFUNCTION:
-    PAD_SVl(ofs) = plu_new_function_object_perl(aTHX_ L);
+    PAD_SVl(ofs) = plu_new_function_object_perl(aTHX_ real_lua_int);
     break;
   case LUA_TUSERDATA:
   case LUA_TTHREAD:
@@ -222,6 +227,7 @@ lua_State *
 plu_new_lua_state(pTHX)
 {
   lua_State *L;
+  PLU_dSTACKASSERT;
 
   L= luaL_newstate();
 
@@ -230,6 +236,7 @@ plu_new_lua_state(pTHX)
       return NULL;
   }
 
+  PLU_ENTER_STACKASSERT(L);
   /* C equivalent of Lua 'perl = {}' */
   lua_newtable(L);
   lua_setfield(L, LUA_GLOBALSINDEX, "perl");
@@ -238,34 +245,36 @@ plu_new_lua_state(pTHX)
 
   /* Install our Perl-interfacing functions */
   lua_getfield(L, LUA_GLOBALSINDEX, "perl");
+
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, S_plu_perl_lexical_to_integer, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_int");
 
-  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, S_plu_perl_lexical_to_number, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_num");
 
-  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, S_plu_perl_lexical_to_string, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_str");
 
-  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, S_plu_perl_lexical_to_table, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_table");
 
-  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
   lua_pushcclosure(L, S_plu_perl_lexical_to_luaval, PLU_N_THX_ARGS);
   lua_setfield(L, -2, "var_to_luaval");
 
-  lua_getfield(L, LUA_GLOBALSINDEX, "perl");
   PLU_PUSH_THX(L);
-  lua_pushcclosure(L, S_plu_lua_to_perl_lexical, PLU_N_THX_ARGS);
+  /* push ptr to the REAL interpreter lua_State for wrapping functions and tables */
+  lua_pushthread(L);
+  lua_pushcclosure(L, S_plu_lua_to_perl_lexical, PLU_N_THX_ARGS+1);
   lua_setfield(L, -2, "lua_val_to_sv");
+
+  lua_pop(L, 1); /* pop off "perl" namespace table */
+
+  PLU_LEAVE_STACKASSERT(L);
 
   return L;
 }
