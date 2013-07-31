@@ -206,7 +206,8 @@ S_plu_lua_to_perl_lexical(lua_State *L)
   case LUA_TLIGHTUSERDATA:
   case LUA_TNONE:
   default:
-    /* FIXME balance stack! */
+    lua_pop(L, 1);
+    PLU_LEAVE_STACKASSERT_MODIFIED(L, -1);
     luaL_error(L, "Lua variables of type '%s' currently "
                   "cannot be converted to Perl scalars", lua_typename(L, ltype));
     break;
