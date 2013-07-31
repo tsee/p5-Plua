@@ -5,7 +5,7 @@ use Test::More;
 use PLua;
 use PLua::Table qw(SHALLOW RECURSIVE);
 
-plan tests => 22;
+plan tests => 23;
 
 # Test Plua::Table API
 
@@ -22,8 +22,10 @@ is($tbl->get("foo"), 12, "Simple table member works");
 isa_ok($tbl->get("tbl"), "PLua::Table", "Nested tables");
 is($tbl->get("tbl")->get(1), 5, "Inner table access");
 is($tbl->get("tbl")->get("1"), undef, "Inner table access using wrong type");
+$tbl->set("foo", 11);
+is($tbl->get("foo"), 11, "Simple table member works after set");
 $tbl->set_int("foo", 13);
-is($tbl->get("foo"), 13, "Simple table member works after set");
+is($tbl->get("foo"), 13, "Simple table member works after set_int");
 $tbl2 = $tbl->get("tbl");
 
 is(ref($tbl->keys), 'ARRAY', "keys() returns array ref");

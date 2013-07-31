@@ -64,6 +64,7 @@ plu_table_t::set_int(key, value)
     set_num = 1
     set_str = 2
     set_table = 3
+    set = 4
   PREINIT:
     STRLEN len;
     char *str;
@@ -98,7 +99,13 @@ plu_table_t::set_int(key, value)
         croak("Failed to convert Perl value to Lua table. Unsupported type?");
       }
       break;
+    default:
+    case 4:
+      plu_push_sv(aTHX_ L, value);
+      break;
     }
+
+    PLU_LEAVE_STACKASSERT_MODIFIED(L, 3);
     lua_settable(L, -3);
     lua_pop(L, 1);
     PLU_LEAVE_STACKASSERT(L);

@@ -92,6 +92,15 @@ Subtables are returned as C<PLua::Table> objects.
 
   my $foo = $tbl->get("key");
 
+=head2 set
+
+Reverse of get, auto-converting the Perl value to a Lua value.
+Since some basic Perl types can end up being slightly ambiguous,
+you may want to prefer more specific setters in some cases, see
+C<set_int> and friends below.
+
+  $tbl->set("key", 2);
+
 =head2 set_int
 
 Reverse of get, but for an integer value (other values
