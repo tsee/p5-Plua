@@ -168,6 +168,31 @@ or work around it. Sorry. Nowadays, with Lua functions being first-class
 objects in Perl, this shouldn't be too painful to work around in most
 cases.
 
+=head1 ACKNOWLEDGMENTS
+
+Code and ideas from a number of other modules has gone into PLua.
+Several people have graciously given advice and support. Apologies
+if this is not a complete list.
+
+Rafael Garcia-Suarez and Reini Urban have provided patches including
+improving the build process.
+
+Tassilo von Parseval wrote L<Inline::Lua> which does much of what
+this module does and is more than just a spiritual precursor.
+
+Lukas Mai wrote L<Function::Parameters> which was very helpful in
+my learning perl's custom keyword and lexer API. A number of functions
+are almost verbatim copies.
+
+Rob Hoelz' advice on Lua as a language and in terms of embedding
+has been invaluable and prevented falling into a number of very
+spiky traps.
+
+Last but not least, Dave Mitchell took the time to write up such a clear
+explanation of how lexicals and closures are implemented in perl that
+even I could follow. His ability to convey very intricate technical
+concepts is really quite humbling.
+
 =head1 AUTHOR
 
 Steffen Mueller, C<< <smueller at cpan dot org> >>
