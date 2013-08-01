@@ -30,8 +30,6 @@ SV *
 plu_table_t::get(key)
     SV *key;
   PREINIT:
-    STRLEN len;
-    char *str;
     int dopop;
     lua_State *L;
     PLU_dSTACKASSERT;
