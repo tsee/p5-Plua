@@ -148,6 +148,8 @@ S_parse_lua_block(pTHX)
   return lua_code_sv;
 }
 
+/* Compiles an embedded lua code block ("lua {{{ ... }}}") to
+ * a Perl custom OP. Errors handles as Perl exceptions. */
 void
 S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
 {
@@ -159,9 +161,12 @@ S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
   /* This handles errors with exceptions: */
   lua_code_sv = S_parse_lua_block(aTHX);
 
+  /* Munge code to support our shady Perl-like
+   * syntax for lexical access */
   plu_munge_lua_code(aTHX_ lua_code_sv);
   code_str = SvPV(lua_code_sv, code_len);
 
+  /* Actually do the code => Lua function compilation */
   plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);
 
   /* Get registry index for the just-compiled function */
