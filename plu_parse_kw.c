@@ -120,15 +120,13 @@ S_parse_lua_block_delimiter(pTHX)
 }
 
 /* Consume a full block of Lua code including delimiters
- * from right after the lua keyword. Creates custom OP
- * in input parameter; croaks on error */
-static void
-S_parse_lua_block(pTHX_ OP **op_ptr)
+ * from right after the lua keyword. Croaks on error */
+static SV *
+S_parse_lua_block(pTHX)
 {
   unsigned int ndelimchars;
   char *code_str;
   STRLEN code_len;
-  int lua_reg_idx;
   SV *lua_code_sv;
 
   /* Count {'s */
@@ -147,6 +145,20 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
           "block delimiter of %i closing braces", (int)ndelimchars);
 
   lua_code_sv = sv_2mortal(newSVpvn(code_str, code_len));
+  return lua_code_sv;
+}
+
+void
+S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
+{
+  SV *lua_code_sv;
+  int lua_reg_idx;
+  char *code_str;
+  STRLEN code_len;
+
+  /* This handles errors with exceptions: */
+  lua_code_sv = S_parse_lua_block(aTHX);
+
   plu_munge_lua_code(aTHX_ lua_code_sv);
   code_str = SvPV(lua_code_sv, code_len);
 
@@ -157,7 +169,6 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   *op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);
 }
 
-
 /* Main keyword plugin hook */
 int
 plu_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) {
@@ -166,7 +177,7 @@ plu_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) 
   if (keyword_len == 3 && memcmp(keyword_ptr, "lua", 3) == 0)
   {
     SAVETMPS;
-    S_parse_lua_block(aTHX_ op_ptr);
+    S_compile_embedded_lua_block(aTHX_ op_ptr);
     ret = KEYWORD_PLUGIN_STMT;
     FREETMPS;
   }
