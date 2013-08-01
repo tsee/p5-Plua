@@ -10,6 +10,52 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+
+/* Append single character to string SV, possibly upgrading
+ * it to UTF8. From Function::Parameters */
+static void
+S_sv_cat_c(pTHX_ SV *sv, U32 c) {
+  char ds[UTF8_MAXBYTES + 1], *d;
+  d = (char *)uvchr_to_utf8((U8 *)ds, c);
+  if (d - ds > 1) {
+    sv_utf8_upgrade(sv);
+  }
+  sv_catpvn(sv, ds, d - ds);
+}
+
+
+#define MY_UNI_IDFIRST(C) isIDFIRST_uni(C)
+#define MY_UNI_IDCONT(C)  isALNUM_uni(C)
+
+/* Scan one identifier. From Function::Parameters */
+static SV *
+S_scan_ident(pTHX)
+{
+  bool at_substart;
+  I32 c;
+  SV *sv = sv_2mortal(newSVpvs(""));
+  if (lex_bufutf8())
+    SvUTF8_on(sv);
+
+  at_substart = TRUE;
+  c = lex_peek_unichar(0);
+
+  while (c != -1) {
+    if (at_substart ? MY_UNI_IDFIRST(c) : MY_UNI_IDCONT(c)) {
+      lex_read_unichar(0);
+      S_sv_cat_c(aTHX_ sv, c);
+      at_substart = FALSE;
+      c = lex_peek_unichar(0);
+    }
+    else {
+      break;
+    }
+  }
+
+  return SvCUR(sv) ? sv : NULL;
+}
+
+
 /* Starting right after an opening set of curlies,
  * scan all the way to the matching closing set (ignoring that
  * there might be comments or string literals) and
@@ -110,7 +156,6 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
   lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX);
   *op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);
 }
- 
 
 
 /* Main keyword plugin hook */
