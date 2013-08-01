@@ -10,6 +10,10 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+/* Starting right after an opening set of curlies,
+ * scan all the way to the matching closing set (ignoring that
+ * there might be comments or string literals) and
+ * return the string up to the closing curlies. */
 static void
 S_scan_lua_block_end(pTHX_ const unsigned int ndelimchars,
                            char **outstring,
@@ -33,11 +37,16 @@ S_scan_lua_block_end(pTHX_ const unsigned int ndelimchars,
         ndelim = 0;
       s++;
     }
-    if ( !lex_next_chunk(LEX_KEEP_PREVIOUS) )
-      croak("Syntax error: cannot find Lua block delimiter");
+    if ( !lex_next_chunk(LEX_KEEP_PREVIOUS) ) {
+      /* "Syntax error: cannot find Lua block delimiter" */
+      *outstring = NULL;
+      *outstringlen = 0;
+      return;
+    }
   }
 }
 
+/* Consume one or more {'s and return the count */
 static unsigned int
 S_parse_lua_block_delimiter(pTHX)
 {
@@ -49,7 +58,7 @@ S_parse_lua_block_delimiter(pTHX)
   /* Let's use one or multiple opening curlies as delimiter ... */
   c = lex_read_unichar(0);
   if (c != '{')
-    croak("Can't find Lua block opening delimiter (one or multiple opening braces)");
+    return 0;
   ndelimchars = 1;
 
   /* Peek first to be able to not eat the first non-delimiter character */
@@ -64,6 +73,9 @@ S_parse_lua_block_delimiter(pTHX)
   return ndelimchars;
 }
 
+/* Consume a full block of Lua code including delimiters
+ * from right after the lua keyword. Creates custom OP
+ * in input parameter; croaks on error */
 static void
 S_parse_lua_block(pTHX_ OP **op_ptr)
 {
@@ -75,6 +87,9 @@ S_parse_lua_block(pTHX_ OP **op_ptr)
 
   /* Count {'s */
   ndelimchars = S_parse_lua_block_delimiter(aTHX);
+  if (ndelimchars == 0)
+    croak("Syntax error: Can't find Lua block "
+          "opening delimiter (one or multiple opening braces)");
 
   lex_read_space(0);
 
