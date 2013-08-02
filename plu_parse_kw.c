@@ -149,7 +149,7 @@ S_parse_lua_block(pTHX)
 }
 
 /* Compiles an embedded lua code block ("lua {{{ ... }}}") to
- * a Perl custom OP. Errors handles as Perl exceptions. */
+ * a Perl custom OP. Errors handled as Perl exceptions. */
 void
 S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
 {
@@ -174,6 +174,159 @@ S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
   *op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);
 }
 
+static void
+S_skip_lua_comments(pTHX)
+{
+  /* TODO implement */
+
+  /* Remember to skip space after the comments */
+  lex_read_space(0);
+}
+
+/* Parses Lua function parameters, starting and ending with parenthesis
+ * and returns them as a string. Croaks on error. */
+static SV *
+S_parse_lua_function_parameters(pTHX)
+{
+  SV *sv;
+  I32 c;
+  int done = 0;
+
+  enum State {
+    IDENTIFIER,
+    SEPARATOR
+  };
+
+  sv = sv_2mortal(newSVpvs(""));
+  if (lex_bufutf8())
+    SvUTF8_on(sv);
+
+  lex_read_space(0);
+
+  c = lex_read_unichar(0);
+  if (c != '(')
+    croak("Syntax error: Expected start of function parameter list '('");
+  S_sv_cat_c(aTHX_ sv, c);
+
+  /* Special case: () */
+  lex_read_space(0);
+  c = lex_peek_unichar(0);
+  if (c == ')') {
+    lex_read_unichar(0);
+    sv_catpvs(sv, ")");
+    return sv;
+  }
+
+  enum State state = IDENTIFIER;
+
+  c = 0;
+  while (c != -1) {
+    lex_read_space(0);
+    S_skip_lua_comments(aTHX);
+
+    if (state == IDENTIFIER) {
+      SV *ident = S_scan_ident(aTHX);
+      if (ident != NULL)
+        sv_catsv_nomg(sv, ident);
+      else { /* attempt to scan '...' instead, must be followed by end-of-list */
+        
+        unsigned int i;
+        for (i = 0; i < 3; ++i) {
+          c = lex_read_unichar(0);
+          if (c != '.')
+            croak("Syntax error: While parsing Lua function parameters, "
+                  "expected identifier or '...', got '%c'\n", c);
+        }
+        sv_catpvs(sv, "...");
+
+        /* Now ensure that '...' was at end of list */
+        lex_read_space(0);
+        S_skip_lua_comments(aTHX);
+        c = lex_read_unichar(0);
+        if (c != ')')
+          croak("Syntax error: While parsing Lua function parameters, "
+                "expected end of list after '...', got '%c'\n", c);
+        sv_catpvs(sv, ")");
+        /* Just in case */
+        lex_read_space(0);
+        S_skip_lua_comments(aTHX);
+        done = 1;
+        break;
+      } /* end 'scan ...' */
+      state = SEPARATOR;
+    } /* end if state == IDENTIFIER */
+    else { /* state == SEPARATOR */
+      c = lex_read_unichar(0);
+      if (c == ')') { /* DONE */
+        sv_catpvs(sv, ")");
+        /* Just in case */
+        lex_read_space(0);
+        S_skip_lua_comments(aTHX);
+        done = 1;
+        break;
+      }
+      else if (c == ',') {
+        sv_catpvs(sv, ",");
+      }
+      else {
+        croak("Syntax error: Expected separator ',' or "
+              "end of parameter list, got '%c' instead", c);
+      }
+      state = IDENTIFIER;
+    }
+  }
+
+  /* In case we just prematurely hit c == -1 */
+  if (done == 0)
+    croak("Syntax error: Reached end of program before the end of the Lua "
+          "parameter list");
+
+  return sv;
+}
+
+/* Compiles an embedded lua function ("lua_function (a,b,...) {{{ ... }}}") to
+ * a Perl custom OP. Errors handled as Perl exceptions. */
+void
+S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
+{
+  SV *lua_code_sv;
+  int lua_reg_idx;
+  char *code_str;
+  STRLEN code_len;
+  SV *lua_func_params;
+  SV *func_name;
+
+  lex_read_space(0);
+  func_name = S_scan_ident(aTHX);
+  if (!func_name)
+    croak("Syntax error: Expected Lua function name");
+
+  /* This handles errors with exceptions: */
+  lex_read_space(0);
+  lua_func_params = S_parse_lua_function_parameters(aTHX);
+  /*printf("PARAMS: '%s'\n", SvPV_nolen(lua_func_params));*/
+
+  /* This handles errors with exceptions: */
+  lex_read_space(0);
+  lua_code_sv = S_parse_lua_block(aTHX);
+  /*printf("CODE: '%s'\n", SvPV_nolen(lua_code_sv)); */
+  /*printf("'%s'\n", PL_parser->bufptr);*/
+
+  /* Munge code to support our shady Perl-like
+   * syntax for lexical access */
+  /*plu_munge_lua_code(aTHX_ lua_code_sv);
+  code_str = SvPV(lua_code_sv, code_len);
+  */
+
+  /* Actually do the code => Lua function compilation */
+  /*plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);*/
+
+  /* Get registry index for the just-compiled function */
+  /* lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX); */
+  /**op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);*/
+  *op_ptr = plu_prepare_custom_op(aTHX_ 0); /* FIXME */
+}
+
 /* Main keyword plugin hook */
 int
 plu_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) {
@@ -186,14 +339,14 @@ plu_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) 
     ret = KEYWORD_PLUGIN_STMT;
     FREETMPS;
   }
-  /*else if ( keyword_len == 12
+  else if ( keyword_len == 12
             && memcmp(keyword_ptr, "lua_function", 12) == 0 )
   {
     SAVETMPS;
-    S_parse_lua_block(aTHX_ op_ptr);
+    S_compile_embedded_lua_function(aTHX_ op_ptr);
     ret = KEYWORD_PLUGIN_STMT;
     FREETMPS;
-  }*/
+  }
   else {
     ret = (*PLU_next_keyword_plugin)(aTHX_ keyword_ptr, keyword_len, op_ptr);
   }
