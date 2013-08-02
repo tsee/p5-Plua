@@ -12,6 +12,7 @@ Relatively Easy:
       it, isn't it?
 - Add checks/exceptions to make sure that table objects passed back into
   a lua_State are referring to the same Lua state!
+- Filehandles (see Inline::Lua)
 
 Medium:
 - Type conversion between Perl and Lua - Tables are hashes AND arrays. The fun!
