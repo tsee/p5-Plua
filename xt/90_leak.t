@@ -107,7 +107,7 @@ SCOPE: {
     $sub = fun
   }}
   not_too_much_growth_many(
-    "Lua block calling anon function"
+    "Calling anon Lua function"
     => sub {
       my $x = $sub->(12);
       $sub->(12123);
@@ -119,7 +119,7 @@ lua_function notleaky (a, ...) {
   return a + 1
 }
 not_too_much_growth_many(
-  "Lua block calling function"
+  "Lua function calling"
   => sub {
     my $x = notleaky(12, 13, 14);
     notleaky(1..10);
