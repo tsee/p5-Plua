@@ -5,11 +5,11 @@ use PLua;
 use Test::More;
 use Linux::Smaps::Tiny qw(get_smaps_summary);
 
-my $many_iters = 100000;
+my $many_iters = 1000000;
 my $many_init_iters = 1000;
-my $many_limit = 100;
+my $many_limit = 10;
 
-plan tests => 7;
+plan tests => 9;
 
 not_too_much_growth_many(
   "Empty Lua block doesn't leak"
@@ -73,6 +73,16 @@ not_too_much_growth_many(
 );
 
 not_too_much_growth_many(
+  "Lua block creating function"
+  => sub {
+    lua {{
+      local fun = function ()
+      end
+    }}
+  },
+);
+
+not_too_much_growth_many(
   "Lua block writing function"
   => sub {
     my ($sub);
@@ -80,12 +90,26 @@ not_too_much_growth_many(
       local fun = function ()
       end
       $sub = fun
-      fun = nil
     }}
-    $sub = undef;
   },
 );
 
+SCOPE: {
+  my $sub;
+  lua {{
+    local fun = function (a)
+      return a + 1
+    end
+    $sub = fun
+  }}
+  not_too_much_growth_many(
+    "Lua block calling anon function"
+    => sub {
+      my $x = $sub->(12);
+      $sub->(12123);
+    },
+  );
+}
 
 pass("Alive");
 
