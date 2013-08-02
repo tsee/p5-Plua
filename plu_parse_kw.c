@@ -325,9 +325,13 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
 
   /* Actually do the code => Lua function compilation */
   plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);
-  /* TODO I think this needs executing once, then capturing a reference
-   *      to the named function that has appeared in Lua global namespace,
-   *      then using THAT to build the Perl coderef! */
+
+  /* I think this needs executing once, then capturing a reference
+   * to the named function that has appeared in Lua global namespace,
+   * then using THAT to build the Perl coderef! */
+  lua_pcall(PLU_lua_int, 0, 0, 0);
+  code_str = SvPV(func_name, code_len);
+  lua_getfield(PLU_lua_int, LUA_GLOBALSINDEX, code_str);
 
   perl_coderef = plu_new_function_object_perl(aTHX_ PLU_lua_int);
   sv_2mortal(perl_coderef);
