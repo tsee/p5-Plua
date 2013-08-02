@@ -199,6 +199,7 @@ S_plu_lua_to_perl_lexical(lua_State *L)
     PAD_SVl(ofs) = plu_new_table_object_perl(aTHX_ real_lua_int);
     break;
   case LUA_TFUNCTION:
+    SvREFCNT_dec(sv);
     PAD_SVl(ofs) = plu_new_function_object_perl(aTHX_ real_lua_int);
     break;
   case LUA_TUSERDATA:
