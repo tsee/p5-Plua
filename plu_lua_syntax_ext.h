@@ -4,7 +4,9 @@
 #include <EXTERN.h>
 #include <perl.h>
 
-void plu_munge_lua_code(pTHX_ SV *lcode);
+/* Modify lcode to replace syntax such as "$x.int" with the respective
+ * Lua / C-function-call code to implement the functionality. */
+void plu_implement_lua_lexicals(pTHX_ SV *lcode);
 
 
 #endif

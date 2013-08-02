@@ -163,7 +163,7 @@ S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
 
   /* Munge code to support our shady Perl-like
    * syntax for lexical access */
-  plu_munge_lua_code(aTHX_ lua_code_sv);
+  plu_implement_lua_lexicals(aTHX_ lua_code_sv);
   code_str = SvPV(lua_code_sv, code_len);
 
   /* Actually do the code => Lua function compilation */

@@ -6,7 +6,7 @@
 #include "plu_lua.h"
 
 void
-plu_munge_lua_code(pTHX_ SV *lcode)
+plu_implement_lua_lexicals(pTHX_ SV *lcode)
 {
   /* This just delegates to Perl functions - regexes
    * are really rather powerful and calling Perl regexes from
