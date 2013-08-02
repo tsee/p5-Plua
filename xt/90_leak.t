@@ -9,7 +9,7 @@ my $many_iters = 1000000;
 my $many_init_iters = 1000;
 my $many_limit = 10;
 
-plan tests => 9;
+plan tests => 10;
 
 not_too_much_growth_many(
   "Empty Lua block doesn't leak"
@@ -69,6 +69,10 @@ not_too_much_growth_many(
       local t = {[0] = "bar"}
       $tbl = t
     }}
+    my $h = $tbl->to_hash;
+    $h = $tbl->to_array;
+    $h = $z->to_hash;
+    $h = $z->to_array;
   },
 );
 
@@ -110,6 +114,17 @@ SCOPE: {
     },
   );
 }
+
+lua_function notleaky (a, ...) {
+  return a + 1
+}
+not_too_much_growth_many(
+  "Lua block calling function"
+  => sub {
+    my $x = notleaky(12, 13, 14);
+    notleaky(1..10);
+  },
+);
 
 pass("Alive");
 
