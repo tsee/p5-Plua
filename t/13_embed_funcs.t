@@ -5,7 +5,7 @@ use PLua;
 
 use Test::More;
 
-plan tests => 1;
+plan tests => 6;
 
 lua_function foo () {
   return

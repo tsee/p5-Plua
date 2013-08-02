@@ -8,5 +8,7 @@
  * Lua / C-function-call code to implement the functionality. */
 void plu_implement_lua_lexicals(pTHX_ SV *lcode);
 
+/* Implement the embedded-function syntax munging. */
+SV *plu_implement_embedded_lua_function(pTHX_ SV *funcname, SV *paramlist, SV *lcode);
 
 #endif

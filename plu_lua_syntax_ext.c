@@ -93,3 +93,22 @@ plu_implement_lua_lexicals(pTHX_ SV *lcode)
   }
 }
 
+
+SV *
+plu_implement_embedded_lua_function(pTHX_ SV *funcname, SV *paramlist, SV *lcode)
+{
+  /* TODO carefully consider what happens to line numbers here */
+  char *str;
+  STRLEN len;
+  SV *rv = sv_2mortal(newSVpvs("function "));
+  sv_catsv_nomg(rv, funcname);
+  sv_catsv_nomg(rv, paramlist);
+  sv_catpvs(rv, "\n");
+  sv_catsv_nomg(rv, lcode);
+  str = SvPV(lcode, len);
+  if (str[len-1] != '\n')
+    sv_catpvs(rv, "\n");
+  sv_catpvs(rv, "end");
+  return rv;
+}
+

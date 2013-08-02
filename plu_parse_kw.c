@@ -295,6 +295,8 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
   STRLEN code_len;
   SV *lua_func_params;
   SV *func_name;
+  SV *full_func_code;
+  SV *perl_coderef;
 
   lex_read_space(0);
   func_name = S_scan_ident(aTHX);
@@ -313,18 +315,21 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
   /*printf("'%s'\n", PL_parser->bufptr);*/
 
   /* Munge code to support our shady Perl-like
-   * syntax for lexical access */
-  /*plu_munge_lua_code(aTHX_ lua_code_sv);
-  code_str = SvPV(lua_code_sv, code_len);
-  */
+   * syntax for lexical access, modifying lua_code_sv */
+  full_func_code
+    = plu_implement_embedded_lua_function(aTHX_
+                                          func_name,
+                                          lua_func_params,
+                                          lua_code_sv);
+  code_str = SvPV(full_func_code, code_len);
 
   /* Actually do the code => Lua function compilation */
-  /*plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);*/
+  plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);
 
-  /* Get registry index for the just-compiled function */
-  /* lua_reg_idx = luaL_ref(PLU_lua_int, LUA_REGISTRYINDEX); */
-  /**op_ptr = plu_prepare_custom_op(aTHX_ lua_reg_idx);*/
-  *op_ptr = plu_prepare_custom_op(aTHX_ 0); /* FIXME */
+  perl_coderef = plu_new_function_object_perl(aTHX_ PLU_lua_int);
+  /* FIXME install named sub here */
+
+  *op_ptr = plu_prepare_null_op(aTHX);
 }
 
 /* Main keyword plugin hook */

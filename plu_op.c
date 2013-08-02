@@ -81,3 +81,16 @@ plu_prepare_custom_op(pTHX_ const int lua_func_registry_idx)
 
   return op;
 }
+
+OP *
+plu_prepare_null_op(pTHX)
+{
+  OP *op;
+
+  op = newOP(OP_NULL, 0);
+  op->op_next = (OP *)op;
+  op->op_private = 0;
+  op->op_flags = 0;
+
+  return op;
+}
