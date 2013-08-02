@@ -5,23 +5,25 @@ use PLua;
 
 use Test::More;
 
-plan tests => 6;
+plan tests => 8;
 
 lua_function foo () {
-  return
+  return 2
 }
 
 pass("Alive");
+is(foo(), 2);
 
 lua_function bar(  ){return}
 
 pass("Alive");
 
 lua_function baz( buz ){
-  return
+  return buz + 1
 }
 
 pass("Alive");
+is(baz(12), 13);
 
 lua_function
  foo2(a, b, c) {

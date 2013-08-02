@@ -5,6 +5,7 @@
 #include "plu_op.h"
 #include "plu_lua.h"
 #include "plu_lua_syntax_ext.h"
+#include "plu_lua_function.h"
 
 #include <lua.h>
 #include <lualib.h>
@@ -290,7 +291,6 @@ void
 S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
 {
   SV *lua_code_sv;
-  int lua_reg_idx;
   char *code_str;
   STRLEN code_len;
   SV *lua_func_params;
@@ -325,9 +325,29 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
 
   /* Actually do the code => Lua function compilation */
   plu_compile_lua_block_or_croak(aTHX_ code_str, code_len);
+  /* TODO I think this needs executing once, then capturing a reference
+   *      to the named function that has appeared in Lua global namespace,
+   *      then using THAT to build the Perl coderef! */
 
   perl_coderef = plu_new_function_object_perl(aTHX_ PLU_lua_int);
-  /* FIXME install named sub here */
+  sv_2mortal(perl_coderef);
+
+  /* FIXME installing named sub here is easiest to me in Perl right now,
+   *       but that's just a lapse. */
+  {
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    XPUSHs(func_name); /* already mortal */
+    XPUSHs(perl_coderef); /* already mortal */
+    PUTBACK;
+
+    call_pv("PLua::_install_sub", G_DISCARD);
+
+    FREETMPS;
+    LEAVE;
+  }
 
   *op_ptr = plu_prepare_null_op(aTHX);
 }

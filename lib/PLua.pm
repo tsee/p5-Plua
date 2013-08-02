@@ -56,6 +56,14 @@ SCOPE: {
   }
 }
 
+# FIXME just do it in XS...
+sub _install_sub {
+  my ($name, $sub) = @_;
+  my ($pkg) = caller();
+  no strict;
+  *{"${pkg}::$name"} = $sub;
+}
+
 XSLoader::load;
 
 1;
