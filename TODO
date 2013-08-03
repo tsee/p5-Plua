@@ -3,7 +3,7 @@ That might not match reality, though:
 
 Relatively Easy:
 - More documentation!
-- More tests!
+- More tests! (and better tests)
 - Improved build system.
 - Other Lua/Perl individual type conversions
 - Expose Perl functions to Lua
@@ -13,6 +13,9 @@ Relatively Easy:
 - Add checks/exceptions to make sure that table objects passed back into
   a lua_State are referring to the same Lua state!
 - Filehandles (see Inline::Lua)
+  => Implemented Perl => Lua and ENTIRELY untested.
+  => TODO: Implement Lua => Perl
+- document lua_function () {}
 
 Medium:
 - Type conversion between Perl and Lua - Tables are hashes AND arrays. The fun!
