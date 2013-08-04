@@ -78,15 +78,35 @@ PLua - Perl and Lua Make a Great Couple!
   use 5.14.0;
   use PLua;
   
+  # Seamlessly embed Lua functions into your Perl code as if
+  # they were Perl functions!
+  lua_function fnord (a, b, c) {
+    return a + b * c
+  }
+  say fnord(12, 2, 3); # prints 18
+
+  # Pass in or return composite data structures: PLua does the
+  # marshalling for you!
+  lua_function sum (ary) {
+    local s = 0
+    for i, num in ipairs(ary) do
+      s = s + num
+    end
+    return s
+  }
+  say sum([5..9]); # prints 35
+  
+  # Even better, embed Lua code directly in Perl without having
+  # to call a function. You can even access Perl lexicals!
   my $foo = 12.3;
   lua {
     local bar = $foo.num
-    ...
+    -- more Lua code...
     bar = bar + 1
     $foo = bar
   }
   say $foo; # prints 13.3
-
+  
   # You can convert Lua tables to Perl!
   my $luatable;
   lua {{
@@ -95,11 +115,12 @@ PLua - Perl and Lua Make a Great Couple!
   }}
   
   say $luatable->get("foo"); # prints "bar"
-  
+
+  use PLua qw(RECURSIVE); # get RECURSIVE symbol
   use Data::Dumper;
-  print Dumper $luatable->to_hash(1); # 1 indicates recursive table conversion
+  print Dumper $luatable->to_hash(RECURSIVE);
   # $VAR1 = {
-  #         'tbl' => {
+  #         'inner' => {
   #                    '1' => '5',
   #                    '2' => '8'
   #                  },
@@ -116,9 +137,10 @@ PLua - Perl and Lua Make a Great Couple!
 
   # You can create Lua tables from Perl explicitly!
   my $tbl = PLua::Table->new;
-  $tbl->set_string("foo" => "bar");
+  $tbl->set_str("foo" => "bar");
   lua {
     print($tbl.table.foo)
+    -- Prints "bar"
   }
 
 =head1 DESCRIPTION
