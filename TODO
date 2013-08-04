@@ -16,6 +16,8 @@ Relatively Easy:
   => Implemented Perl => Lua and ENTIRELY untested.
   => TODO: Implement Lua => Perl
 - document lua_function () {}
+- Figure out what Lua's ... should do on the Perl side and whether/how it's
+  portable between 5.1/5.2/future.
 
 Medium:
 - Type conversion between Perl and Lua - Tables are hashes AND arrays. The fun!
