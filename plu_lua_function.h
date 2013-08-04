@@ -20,6 +20,11 @@ plu_function_t *plu_new_function_object(pTHX_ lua_State *ls);
  * Perl sub{} (RV to CV) (not mortalized) */
 SV *plu_new_function_object_perl(pTHX_ lua_State *ls);
 
+/* Same as plu_new_function_object, but then converts it to a
+ * Perl sub{} (RV to CV) (not mortalized)
+ * Installs the sub as a named sub of fully qualified name 'fullname'. */
+SV *plu_install_new_function_object_perl(pTHX_ lua_State *ls, char *fullname);
+
 #define PLU_LUA_FUNCTION_PUSH_TO_STACK(func) \
     lua_rawgeti((func).L, LUA_REGISTRYINDEX, (func).registry_index)
 

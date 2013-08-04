@@ -36,12 +36,12 @@ plu_new_function_object(pTHX_ lua_State *ls)
 }
 
 /* Create a new XSUB instance and set it's XSANY.any_ptr to contain the
- * necessary user data.
+ * necessary user data. fqname can be NULL => fully anonymous sub
  * Requires a previous declaration of a CV* cv!
  **/
-#define NEW_CV_WITH_PTR(xsub, user_pointer)                                 \
+#define NEW_CV_WITH_PTR_NAME(xsub, user_pointer, fqname)                    \
 STMT_START {                                                                \
-  cv = newXS(NULL, xsub, (char*)__FILE__);                                  \
+  cv = newXS(fqname, xsub, (char*)__FILE__);                                \
   if (cv == NULL)                                                           \
     croak("ARG! Something went really wrong while installing a new XSUB!"); \
   XSANY.any_ptr = (void *)user_pointer;                                     \
@@ -55,6 +55,13 @@ XS(XS_PLua__invoke_lua_function);
 SV *
 plu_new_function_object_perl(pTHX_ lua_State *L)
 {
+  return plu_install_new_function_object_perl(aTHX_ L, (char *)NULL);
+}
+
+
+SV *
+plu_install_new_function_object_perl(pTHX_ lua_State *L, char *fullname)
+{
   SV *rv;
   CV *cv;
   HV *stash;
@@ -66,7 +73,12 @@ plu_new_function_object_perl(pTHX_ lua_State *L)
   stash = gv_stashpvs("PLua::Function", 1);
   func = plu_new_function_object(aTHX_ L);
 
-  NEW_CV_WITH_PTR(XS_PLua__invoke_lua_function, func);
+  NEW_CV_WITH_PTR_NAME(XS_PLua__invoke_lua_function, func, fullname);
+  /* If we're installing into the stash, then one reference will be
+   * owned by it + one by the reference we're about to create.
+   * I'm about 85% certain that this is correct and won't leak. */
+  if (fullname != NULL)
+    SvREFCNT_inc(cv);
   rv = newRV_noinc((SV *)cv);
   sv_bless(rv, stash);
 
@@ -74,4 +86,4 @@ plu_new_function_object_perl(pTHX_ lua_State *L)
   return rv;
 }
 
-#undef NEW_CV_WITH_PTR
+#undef NEW_CV_WITH_PTR_NAME

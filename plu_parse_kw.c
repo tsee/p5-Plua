@@ -296,7 +296,6 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
   SV *lua_func_params;
   SV *func_name;
   SV *full_func_code;
-  SV *perl_coderef;
 
   lex_read_space(0);
   func_name = S_scan_ident(aTHX);
@@ -333,24 +332,13 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
   code_str = SvPV(func_name, code_len);
   lua_getfield(PLU_lua_int, LUA_GLOBALSINDEX, code_str);
 
-  perl_coderef = plu_new_function_object_perl(aTHX_ PLU_lua_int);
-  sv_2mortal(perl_coderef);
-
-  /* FIXME installing named sub here is easiest to me in Perl right now,
-   *       but that's just a lapse. */
   {
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    XPUSHs(func_name); /* already mortal */
-    XPUSHs(perl_coderef); /* already mortal */
-    PUTBACK;
-
-    call_pv("PLua::_install_sub", G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
+    /* Install the function into the Perl stash */
+    SV *funcref;
+    funcref = plu_install_new_function_object_perl(aTHX_ PLU_lua_int, SvPV_nolen(func_name));
+    SvREFCNT_dec(funcref); /* This ref is unused - a bit of a waste */
+    /* No need to up the refcnt of the CV since
+     * plu_install_new_function_object_perl adds one refcnt for the stash. */
   }
 
   *op_ptr = plu_prepare_null_op(aTHX);
