@@ -1,5 +1,8 @@
 #include "plu_lua_function.h"
 
+/* This ties in with xs/Function.xs insofar as both bodies of code
+ * pertain to Lua functions being exposed to Perl. */
+
 /* For versions of ExtUtils::ParseXS > 3.04_02, we need to
  * explicitly enforce exporting of XSUBs since we want to
  * refer to them using XS(). This isn't strictly necessary,

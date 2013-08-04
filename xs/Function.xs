@@ -1,3 +1,5 @@
+## See also: plu_lua_function.{c,h}
+
 MODULE = PLua PACKAGE = PLua
 PROTOTYPES: DISABLE
 
