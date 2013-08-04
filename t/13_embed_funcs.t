@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 use PLua;
+use lib 'lib', 't/lib';
+use PLua::Test;
 
 use Test::More;
 
@@ -58,8 +60,32 @@ SCOPE: {
 }
 
 subtest "Argument list corner cases" => sub {
-  plan tests => 1;
-  SKIP: {skip "Test not written yet" => 1}
+  plan tests => 7;
+
+  my ($ok, @rv);
+
+  lua_function t1(a) {
+    return a+1
+  }
+  ($ok, @rv) = compile_pass_ok("t1(123)", "Simple function call ok");
+  ok(scalar(@rv)==1 && $rv[0] == 124, "Function call result ok");
+
+  ($ok, @rv) = compile_pass_ok("t1(123, 131)", "Simple function call with too many params ignores extra params");
+  ok(scalar(@rv)==1 && $rv[0] == 124, "Function call result ok");
+
+  lua_function t2(a) {
+    return a
+  }
+  ($ok, @rv) = compile_pass_ok("t2()", "Simple function call with too few params pads with undef");
+  ok(scalar(@rv)==1 && !defined($rv[0]), "Function call result ok");
+
+  #lua_function t3(a, b, ...) {{
+  #  return ...
+  #}}
+  #
+  #my @x = t3(1,2,3,4);
+  #use Data::Dumper;
+  #warn Dumper @x;
 };
 
 pass("Alive");
