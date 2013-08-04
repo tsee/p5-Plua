@@ -30,6 +30,7 @@ Medium:
      object ownership and lua_State object lifetime. Ugh refcounting?
 - Lua functions can now be exported to Perl as subrefs. Yay.
   But what kind of syntax would be good for actively exporting named functions?
+- Use hints hash to make the keywords valid in lexical scope of PLua import only.
 
 Harder:
 - Move much or all of global state to per-Perl-interpreter storage.
