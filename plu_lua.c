@@ -114,6 +114,14 @@ S_plu_perl_lexical_to_table(lua_State *L)
     SV * const tmpsv = PAD_SV(ofs);
     if (SvROK(tmpsv) && sv_derived_from(tmpsv, "PLua::Table")) {
       plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(tmpsv));
+      if (tbl->L != L) {
+        /* FIXME this check might run afoul of the Lua coroutine madness that is abusing
+         *       lua_State* to represent both interpreters and coroutines in C. */
+        luaL_error(L, "Trying to pass Lua table (a PLua::Table object) owned "
+                      "by Lua interpreter '%p' to the currently executing Lua interpreter '%p'. "
+                      "Lua tables are bound to their Lua interpreter of origin",
+                      tbl->L, L);
+      }
       PLU_TABLE_PUSH_TO_STACK(*tbl);
     }
     else {
