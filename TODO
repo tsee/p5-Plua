@@ -30,7 +30,6 @@ Medium:
   main bits of interface wrapped for Perl.
   => Harder bit is figuring out how this ties in with function and table
      object ownership and lua_State object lifetime. Ugh refcounting?
-- Use hints hash to make the keywords valid in lexical scope of PLua import only.
 
 Harder:
 - Move much or all of global state to per-Perl-interpreter storage.
