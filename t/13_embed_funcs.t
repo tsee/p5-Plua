@@ -60,7 +60,7 @@ SCOPE: {
 }
 
 subtest "Argument list corner cases" => sub {
-  plan tests => 7;
+  plan tests => 6;
 
   my ($ok, @rv);
 
