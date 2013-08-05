@@ -11,9 +11,21 @@ else {
   $OPTIMIZE = '-DNDEBUG';
 }
 
-my $luajit_inst_dir = $ENV{LUAJIT_DIR};
-my $libdir = $luajit_inst_dir ? "-L$luajit_inst_dir/lib " : "";
-my $incdir = "-I" . ($luajit_inst_dir || '/usr') . "/include/luajit-2.0";
+# If the environment variable LUAJIT_DIR is defined, build with luajit.
+# Else, build with regular lua, to be found in LUA_DIR, ~/lua, or /usr.
+
+my $lua_inst_dir = $ENV{LUAJIT_DIR} || $ENV{LUA_DIR} || $ENV{HOME}."/lua";
+if ($ENV{LUAJIT_DIR}) {
+    print "Building with luajit\n";
+}
+if (-d $lua_inst_dir) {
+    print "lua found in $lua_inst_dir\n";
+}
+else {
+    $lua_inst_dir = '';
+}
+my $libdir = $lua_inst_dir ? "-L$lua_inst_dir/lib " : "";
+my $incdir = "-I" . ($lua_inst_dir || '/usr') . "/include" . ($ENV{LUAJIT_DIR} ? "/luajit-2.0" : "");
 
 WriteMakefile(
   NAME                => 'PLua',
@@ -46,7 +58,7 @@ WriteMakefile(
   dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
   clean => { FILES => 'PLua-*' },
   DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
-  LIBS              => ["$libdir -lluajit-5.1"],
+  LIBS              => $ENV{LUAJIT_DIR} ? ["$libdir -lluajit-5.1"] : ["$libdir -llua"],
   INC               => "$incdir -I.",
   OPTIMIZE          => $OPTIMIZE,
   OBJECT            => '$(O_FILES)',
