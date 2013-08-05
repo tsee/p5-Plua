@@ -10,6 +10,12 @@
 #include "plu_inline.h"
 #include "plu_table.h"
 
+#ifndef LUAJIT_VERSION
+/* two of the compatibility macros defined in lua's luaconf.h */
+#define lua_strlen(L,i)		lua_rawlen(L, (i))
+#define lua_objlen(L,i)		lua_rawlen(L, (i))
+#endif
+
 /* Create new Lua interpreter and initialize it */
 lua_State *plu_new_lua_state(pTHX);
 
@@ -43,5 +49,10 @@ int plu_push_table_obj(pTHX_ SV *sv);
 
 /* Returns status from executing lua_func_name. Uses global PLU_lua_int */
 /* int plu_call_lua_func(pTHX_ const char *lua_func_name); */
+
+/* LUA_GLOBALSINDEX is defined by luajit, not by lua */
+#ifndef LUA_GLOBALSINDEX
+#   define LUA_GLOBALSINDEX LUA_REGISTRYINDEX
+#endif
 
 #endif
