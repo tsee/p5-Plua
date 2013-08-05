@@ -6,7 +6,7 @@ use PLua;
 use lib 'lib', 't/lib';
 use PLua::Test;
 
-plan tests => 10;
+plan tests => 11;
 
 compile_pass_ok("lua{}", "empty Lua block");
 compile_pass_ok("lua{ }", "almost empty Lua block");
@@ -17,5 +17,6 @@ compile_pass_ok("lua{\nlocal foo = 1}", "Lua block with actual code, beginning n
 compile_pass_ok("lua{local foo = 1\n}", "Lua block with actual code, ending newline");
 compile_pass_ok("lua{local foo = 1}", "Lua block with actual code, no newlines");
 compile_pass_ok("lua { local foo = 1 } ", "Lua block with actual code, no newlines but spaces");
+compile_fail_ok("no PLua; lua { } ", "Empty Lua block with 'no PLua' fails to compile");
 
 pass("Alive");

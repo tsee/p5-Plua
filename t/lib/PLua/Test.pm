@@ -2,7 +2,7 @@ package  # Hide from PAUSE
   PLua::Test;
 use 5.14.0;
 use warnings;
-use PLua ();
+use PLua;
 use Test::More;
 use Exporter 'import';
 

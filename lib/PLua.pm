@@ -7,9 +7,22 @@ use XSLoader;
 
 our $VERSION = '0.01';
 use PLua::Table qw(RECURSIVE SHALLOW);
-use Exporter 'import';
+use Exporter ();
+our @ISA = qw(Exporter); # sigh
 our @EXPORT_OK = (@PLua::Table::EXPORT_OK);
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
+
+sub import {
+  # Enable keywords in lexical scope ("Plua:kw" isn't
+  # magical, it just needs to match XS)
+  $^H{"PLua:kw"} = 1;
+  __PACKAGE__->export_to_level(1, @_);
+}
+
+sub unimport {
+  # and disable keywords!
+  delete $^H{"PLua:kw"};
+}
 
 SCOPE: {
   my $ident = qr/[a-zA-Z0-9_]+/;

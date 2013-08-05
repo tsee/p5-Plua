@@ -348,6 +348,13 @@ S_compile_embedded_lua_function(pTHX_ OP **op_ptr)
 int
 plu_my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr) {
   int ret;
+  HV *hints;
+
+  /* Enforce lexical scope of this keyword plugin */
+  if (!(hints = GvHV(PL_hintgv)))
+    return FALSE;
+  if (!(hv_fetchs(hints, "PLua:kw", 0)))
+    return FALSE;
 
   if (keyword_len == 3 && memcmp(keyword_ptr, "lua", 3) == 0)
   {
