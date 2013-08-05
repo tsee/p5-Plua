@@ -16,7 +16,6 @@ Relatively Easy:
 - Filehandles (see Inline::Lua)
   => Implemented Perl => Lua and ENTIRELY untested.
   => TODO: Implement Lua => Perl
-- document lua_function () {}
 - Figure out what Lua's ... should do on the Perl side and whether/how it's
   portable between 5.1/5.2/future.
 
@@ -31,8 +30,6 @@ Medium:
   main bits of interface wrapped for Perl.
   => Harder bit is figuring out how this ties in with function and table
      object ownership and lua_State object lifetime. Ugh refcounting?
-- Lua functions can now be exported to Perl as subrefs. Yay.
-  But what kind of syntax would be good for actively exporting named functions?
 - Use hints hash to make the keywords valid in lexical scope of PLua import only.
 
 Harder:
