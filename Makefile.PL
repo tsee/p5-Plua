@@ -15,6 +15,8 @@ else {
 # If the environment variable LUAJIT_DIR is defined, build with luajit.
 # Else, build with regular lua, to be found in LUA_DIR, ~/lua, or /usr.
 
+# TODO configure-style test-compile that determines availability
+#      of luajit, then lua! Wither Alien::Lua(JIT)?
 my $lua_inst_dir = $ENV{LUAJIT_DIR} || $ENV{LUA_DIR} || $ENV{HOME}."/lua";
 if ($ENV{LUAJIT_DIR}) {
     print "Building with luajit\n";
