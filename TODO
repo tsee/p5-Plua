@@ -5,6 +5,7 @@ Relatively Easy:
 - More documentation!
 - More tests! (and better tests)
 - Improved build system.
+  => luajit, lua, which? Which one by default? See TODO in Makefile.PL, too.
 - Other Lua/Perl individual type conversions
 - Expose Perl functions to Lua
   => In both cases, what's the syntax to mark a function as exported? Or
