@@ -10,7 +10,7 @@
 #include "plu_inline.h"
 #include "plu_table.h"
 
-#ifndef LUAJIT_VERSION
+#ifndef PLU_LUAJIT
 /* two of the compatibility macros defined in lua's luaconf.h */
 #define lua_strlen(L,i)		lua_rawlen(L, (i))
 #define lua_objlen(L,i)		lua_rawlen(L, (i))
