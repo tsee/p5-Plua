@@ -2,34 +2,40 @@ use 5.014;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
+use Getopt::Long qw(GetOptions);
+
+# --no-jit disables JIT even if available, otherwise when enabled,
+# falls through to non-JIT, standard Lua if "Alien::LuaJIT" isn't
+# available.
+GetOptions(
+  'jit!' => \(my $use_jit = 1),
+);
 
 my $OPTIMIZE;
 my $DEFINE = '';
 if ($ENV{DEBUG}) {
+  # gccism but all known people who've tried to debug PLua use gcc
   $OPTIMIZE = '-DDEBUG -O0 -g -Wall -Wextra -Wno-unused-function';
 }
 else {
   $OPTIMIZE = '-DNDEBUG';
 }
 
-# If the environment variable LUAJIT_DIR is defined, build with luajit.
-# Else, build with regular lua, to be found in LUA_DIR, ~/lua, or /usr.
+use Alien::Lua;
+my $alien = Alien::Lua->new(luajit => $use_jit);
 
-# TODO configure-style test-compile that determines availability
-#      of luajit, then lua! Wither Alien::Lua(JIT)?
-my $lua_inst_dir = $ENV{LUAJIT_DIR} || $ENV{LUA_DIR} || $ENV{HOME}."/lua";
-if ($ENV{LUAJIT_DIR}) {
-    print "Building with luajit\n";
-    $DEFINE .= ' -DPLU_LUAJIT';
+my $libs = $alien->libs;
+my $cflags = $alien->cflags;
+if ($alien->luajit) {
+  $DEFINE .= " -DPLU_LUAJIT";
+  say "Using Alien::LuaJIT-configured luajit";
 }
-if (-d $lua_inst_dir) {
-    print "lua found in $lua_inst_dir\n";
+elsif (!$use_jit) {
+  say "Explicitly disabled use of luajit";
 }
 else {
-    $lua_inst_dir = '';
+  say "Alien::LuaJIT not available, using standard Alien::Lua";
 }
-my $libdir = $lua_inst_dir ? "-L$lua_inst_dir/lib " : "";
-my $incdir = "-I" . ($lua_inst_dir // '/usr') . "/include" . ($ENV{LUAJIT_DIR} ? "/luajit-2.0" : "");
 
 WriteMakefile(
   NAME                => 'PLua',
@@ -37,6 +43,7 @@ WriteMakefile(
   VERSION_FROM        => 'lib/PLua.pm',
   CONFIGURE_REQUIRES => {
     'ExtUtils::MakeMaker' => '6.56',
+    'Alien::Lua' => '5.1.0', # min 5.1.0
   },
   LICENSE => 'perl',
   PL_FILES            => {},
@@ -62,8 +69,8 @@ WriteMakefile(
   dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
   clean => { FILES => 'PLua-*' },
   DEFINE            => $DEFINE,
-  LIBS              => $ENV{LUAJIT_DIR} ? ["$libdir -lluajit-5.1"] : ["$libdir -llua"],
-  INC               => "$incdir -I.",
+  LIBS              => $libs,
+  INC               => "-I. $cflags",
   OPTIMIZE          => $OPTIMIZE,
   OBJECT            => '$(O_FILES)',
 );
