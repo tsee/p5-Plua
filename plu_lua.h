@@ -47,9 +47,6 @@ int plu_push_table_obj(pTHX_ SV *sv);
 
 #include "plu_lua_inline.h"
 
-/* Returns status from executing lua_func_name. Uses global PLU_lua_int */
-/* int plu_call_lua_func(pTHX_ const char *lua_func_name); */
-
 /* LUA_GLOBALSINDEX is defined by luajit, not by lua */
 #ifndef LUA_GLOBALSINDEX
 #   define LUA_GLOBALSINDEX LUA_REGISTRYINDEX
