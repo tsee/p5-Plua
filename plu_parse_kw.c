@@ -178,10 +178,72 @@ S_compile_embedded_lua_block(pTHX_ OP **op_ptr)
 static void
 S_skip_lua_comments(pTHX)
 {
+  I32 c;
+  size_t nclosing_eqs = 0;
+  int long_comment = 0;
   /* TODO implement */
 
   /* Remember to skip space after the comments */
   lex_read_space(0);
+
+  c = lex_peek_unichar(0);
+  if (c != '-')
+    return;
+  /* Committed to this being a comment as far as I understand Lua syntax! */
+
+  lex_read_unichar(0); /* skip */
+  c = lex_read_unichar(0);
+  if (c != '-')
+    croak("Invalid Lua comment");
+
+  /* Is this a long comment? */
+  c = lex_peek_unichar(0);
+  if (c == '[') {
+    c = lex_read_unichar(0);
+    /* It is likely a long comment! */
+    while (1) {
+      c = lex_read_unichar(0);
+      if (c == '=') {
+        ++nclosing_eqs;
+      }
+      else if (c == '[') {
+        /* long comment */
+        long_comment = 1;
+      }
+      else if (c != '[') {
+        /* short comment */
+        break;
+      }
+    }
+  }
+
+  /* Now either scan until we hit the long comment delimiter
+   * or to the end of the line for short comments. */
+  if (long_comment) {
+    croak("Long Lua comments in parameter list not supported yet"); /* TODO */
+  }
+  else { /* short comment */
+    while (1) {
+      char* const end = PL_parser->bufend;
+      char *s = PL_parser->bufptr;
+
+      while (end-s >= 1) {
+        if (*s == '\n') {
+          lex_read_to(s); /* skip Perl's lexer/parser ahead to end of Lua block */
+          lex_read_space(0);
+          return;
+        }
+        s++;
+      }
+      if ( !lex_next_chunk(LEX_KEEP_PREVIOUS) ) {
+        lex_read_to(s); /* skip Perl's lexer/parser ahead to end of Lua block */
+        lex_read_space(0);
+        return; /* end of code */
+      }
+    }
+    lex_read_space(0);
+    return;
+  }
 }
 
 /* Parses Lua function parameters, starting and ending with parenthesis
@@ -236,7 +298,7 @@ S_parse_lua_function_parameters(pTHX)
           c = lex_read_unichar(0);
           if (c != '.')
             croak("Syntax error: While parsing Lua function parameters, "
-                  "expected identifier or '...', got '%c'\n", c);
+                  "expected identifier or '...', got '%c'", c);
         }
         sv_catpvs(sv, "...");
 
@@ -246,7 +308,7 @@ S_parse_lua_function_parameters(pTHX)
         c = lex_read_unichar(0);
         if (c != ')')
           croak("Syntax error: While parsing Lua function parameters, "
-                "expected end of list after '...', got '%c'\n", c);
+                "expected end of list after '...', got '%c'", c);
         sv_catpvs(sv, ")");
         /* Just in case */
         lex_read_space(0);

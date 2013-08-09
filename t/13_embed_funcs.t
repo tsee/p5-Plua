@@ -11,7 +11,7 @@ plan tests => 4;
 
 # First, test basic parse/execute
 subtest "Basic parse/execute" => sub {
-  plan tests => 7;
+  plan tests => 9;
   lua_function foo () {
     return 2
   }
@@ -31,7 +31,25 @@ subtest "Basic parse/execute" => sub {
   is(baz(12), 13);
 
   lua_function
-   foo2(a, b, c) {
+   foo4(a, b,c --foo ) {
+     ) {
+    return
+  }
+
+  pass("Alive");
+
+
+  lua_function
+   foo2(a, b, --foo
+       c) {
+    return
+  }
+
+  pass("Alive");
+
+  lua_function foo3(a, b, -- bar!
+                    c -- baz
+  ) {
     return
   }
 
