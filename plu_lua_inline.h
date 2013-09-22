@@ -44,8 +44,18 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
     }
   case LUA_TFUNCTION:
     croak("Cannot convert a Lua function yet");
-    /**dopop = 0;
-    return func_ref(L);*/
+    /*{
+      SV *sv;
+      *dopop = 0;
+      if (UNLIKELY( idx != -1 )) {
+        lua_pushvalue(L, idx);
+        sv = plu_new_function_object_perl(aTHX_ L);
+      }
+      else {
+        sv = plu_new_function_object_perl(aTHX_ L);
+      }
+      return sv;
+    }*/
   default:
     croak("Unknown/unsupported Lua type detected");
   }
@@ -75,8 +85,12 @@ plu_luaval_to_perl_safe(pTHX_ lua_State *L, int idx)
     }
   case LUA_TFUNCTION:
     croak("Cannot convert a Lua function yet");
-    /**dopop = 0;
-    return func_ref(L);*/
+    /*{
+      SV *sv;
+      lua_pushvalue(L, idx);
+      sv = plu_new_function_object_perl(aTHX_ L);
+      return sv;
+    }*/
   default:
     croak("Unknown/unsupported Lua type detected");
   }
