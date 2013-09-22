@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 use Scalar::Util qw(reftype);
-plan tests => 25;
+plan tests => 27;
 
 sub check_lua_function {
   my ($func, $name) = @_;
@@ -103,5 +103,30 @@ is_deeply(\@rvs, [5,6,11], "$name returns right list in list context");
 $rv = $func->(12, 13);
 is($rv, 25, "$name returns right thing (perl scalar context), with parameters");
 
+###############
+# Returning Lua function from Lua function
+lua {
+  local f = function(a)
+    local f2 = function(b)
+      return a+b
+    end
+    return f2
+  end
+  $func = f
+}
+my $f2 = $func->(42);
+isa_ok($f2, "PLua::Function");
+is($f2->(2), 44);
+
+##############
+# Passing Lua function to lua function
+#SCOPE: {
+#  my $x;
+#  lua {
+#    local f = $f2.any
+#    --$x = f(3)
+#  }
+#  is($x, 45);
+#}
 
 pass("Alive");

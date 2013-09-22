@@ -5,6 +5,8 @@
 
 #include "plu_inline.h"
 #include "plu_debug.h"
+#include "plu_lua_function.h"
+#include "plu_table.h"
 
 /* Greatly inspired by Inline::Lua! */
 /* Turns a Lua type into a Perl type and returns it.  
@@ -92,6 +94,10 @@ plu_push_sv(pTHX_ lua_State *L, SV * const sv)
     if (sv_derived_from(sv, "PLua::Table")) {
       plu_table_t *tbl = (plu_table_t *)SvIV(SvRV(sv));
       PLU_TABLE_PUSH_TO_STACK(*tbl);
+    }
+    else if (sv_derived_from(sv, "PLua::Function")) {
+      plu_function_t *fun = (plu_function_t *)SvIV(SvRV(sv));
+      PLU_LUA_FUNCTION_PUSH_TO_STACK(*fun);
     }
     else {
       SV * const inner = SvRV(sv);
