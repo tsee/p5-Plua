@@ -43,8 +43,7 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
       return sv;
     }
   case LUA_TFUNCTION:
-    croak("Cannot convert a Lua function yet");
-    /*{
+    {
       SV *sv;
       *dopop = 0;
       if (UNLIKELY( idx != -1 )) {
@@ -55,7 +54,7 @@ plu_luaval_to_perl(pTHX_ lua_State *L, int idx, int *dopop)
         sv = plu_new_function_object_perl(aTHX_ L);
       }
       return sv;
-    }*/
+    }
   default:
     croak("Unknown/unsupported Lua type detected");
   }
@@ -84,13 +83,12 @@ plu_luaval_to_perl_safe(pTHX_ lua_State *L, int idx)
       return sv;
     }
   case LUA_TFUNCTION:
-    croak("Cannot convert a Lua function yet");
-    /*{
+    {
       SV *sv;
       lua_pushvalue(L, idx);
       sv = plu_new_function_object_perl(aTHX_ L);
       return sv;
-    }*/
+    }
   default:
     croak("Unknown/unsupported Lua type detected");
   }
@@ -110,7 +108,7 @@ plu_push_sv(pTHX_ lua_State *L, SV * const sv)
       PLU_TABLE_PUSH_TO_STACK(*tbl);
     }
     else if (sv_derived_from(sv, "PLua::Function")) {
-      plu_function_t *fun = (plu_function_t *)SvIV(SvRV(sv));
+      plu_function_t *fun = plu_func_from_cv(aTHX_ (CV *)SvRV(sv));
       PLU_LUA_FUNCTION_PUSH_TO_STACK(*fun);
     }
     else {

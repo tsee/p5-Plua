@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use PLua;
 use Scalar::Util qw(reftype);
-plan tests => 27;
+plan tests => 28;
 
 sub check_lua_function {
   my ($func, $name) = @_;
@@ -120,13 +120,13 @@ is($f2->(2), 44);
 
 ##############
 # Passing Lua function to lua function
-#SCOPE: {
-#  my $x;
-#  lua {
-#    local f = $f2.any
-#    --$x = f(3)
-#  }
-#  is($x, 45);
-#}
+SCOPE: {
+  my $x;
+  lua {
+    local f = $f2.any
+    $x = f(3)
+  }
+  is($x, 45);
+}
 
 pass("Alive");
