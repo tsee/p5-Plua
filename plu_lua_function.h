@@ -25,6 +25,9 @@ SV *plu_new_function_object_perl(pTHX_ lua_State *ls);
  * Installs the sub as a named sub of fully qualified name 'fullname'. */
 SV *plu_install_new_function_object_perl(pTHX_ lua_State *ls, char *fullname);
 
+/* Extract function struct ptr from CV */
+plu_function_t *plu_func_from_cv(pTHX_ CV *cv);
+
 #define PLU_LUA_FUNCTION_PUSH_TO_STACK(func) \
     lua_rawgeti((func).L, LUA_REGISTRYINDEX, (func).registry_index)
 

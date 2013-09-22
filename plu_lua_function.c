@@ -89,4 +89,11 @@ plu_install_new_function_object_perl(pTHX_ lua_State *L, char *fullname)
   return rv;
 }
 
+
+plu_function_t *
+plu_func_from_cv(pTHX_ CV *cv)
+{
+  return (plu_function_t *)XSANY.any_ptr;
+}
+
 #undef NEW_CV_WITH_PTR_NAME
